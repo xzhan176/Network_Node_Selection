@@ -17,7 +17,7 @@ This code has been written in Python. All neccessary packages have been included
 5. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiemnt 
-### Initial Conditions
+### 1. Initial Conditions
 At the first round, two players choose an action without considering another player's action. 
 
 Above python code start the game with players' random actions in the first round by calling Random_play() function. Every time one run the expriment in the above 1-4 
@@ -28,10 +28,10 @@ The game can also start with players' intentional selection(i.e., in the first r
 that minimize polarization). To achieve this, comment out the line (v1, max_opinion) = random_play() at line and line, then uncomment (v1, max_opinion) = max_first_play() 
 at line xxx and (v2, min_opinion) = min_first_play() at line xxx.
 
-### Innate Opinons and Network Structure
+### 2. Innate Opinons and Network Structure
 One can change the innate opinion/structure of the network at the Section 2 in the code "Innate Opinions and Adjacency Matrix".
 
-### Exit Out Situation
+### 3. Exit Out Situation
 If two players selected same agent at the first round, the game will exit out automatically. Since two players cannot choose the same agent in same round based on Game
 theory principal, the conditional Exit Out command is to avoid this happens. If one come across Exit Out situation, just run the game again, then the new random 
 actions will overwrite the previous actions. 
