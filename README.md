@@ -1,13 +1,11 @@
+
 # Opinion Polarization Games over Social Network
-Two players a maximizer and a minimizer change agent's opinion in the network. Maximizer trys to select a agent and change its opinion so that the polarization at equilibrium will be the maximum. Minimizer trys to take an action(select an agent, and change its opinion to a value) to minimize the equilibrium polarization of the network. 
-Abstract ...
+Xilin Zhang and Emrah Akyol
+## Abstract 
+This paper provides a quantitative analysis of a game over a social network of agents, some of which are controlled by two players whose objectives are to maximize and minimize respectively polarization over this network. Opinions of agents evolve according to the Friedkin-Johnsen model, and players can change only the innate opinion of an agent of their choosing. Polarization is measured via the sample variance of the agents' steady-state opinions. The practically motivated constraint on the set of players' choice of agents to be disjoint transforms this simple zero-sum game into a compelling and largely unexplored research problem. We first analyze the functional properties of this game and characterize the optimal best response for each player given the agent. Next, we analyze the properties of the Nash equilibrium. Finally, we simulate a variation of the fictitious play algorithm to obtain the equilibrium in synthetic and real data networks, where the constraint mentioned above imposes a minor modification on the classical fictitious play algorithm. All of our codes and datasets are available publicly for research purposes. 
 
-This paper includes sythetic network and real network. 
-  Systhetic network is generated in the python code. 
-  Real networks include Reddit and Twitter network that imported from read datasets. 
-All datasets are in the Data folder. 
 
-# Python Code
+## Python Code
 This code has been written in Python. All neccessary packages have been included in the code. This directory contains the following documented Python files. 
 
 1. Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
