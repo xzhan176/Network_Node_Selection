@@ -12,7 +12,8 @@ This code has been written in Python. All neccessary packages have been included
 2. Extreme Network 2: Given a symmetric triangle network, except the network structure, other are same as Extrem Network 1.
 3. Testing Reddit: Imported Reddit network from data folder, then two players start fictitious play on the Reddit network until a Nash Equlibrium is found.
 4. Testing Twitter: Imported Twitter network from data folder, same procedure as Reddit Network. 
-5. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
+5. Testing Karate: Imported Karate network from data folder, same procedure as Reddit Network. 
+6. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiemnt 
 ### 1. Initial Conditions
