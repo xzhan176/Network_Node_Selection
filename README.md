@@ -8,8 +8,8 @@ This paper provides a quantitative analysis of a game over a social network of a
 ## Python Code
 This code has been written in Python. All neccessary packages have been included in the code. This directory contains the following documented Python files. 
 
-1. Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
-2. Extreme Network 2: Given a symmetric triangle network, except the network structure, other are same as Extrem Network 1.
+1. Testing Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
+2. Testing Extreme Network 2: Given a symmetric triangle network, except the network structure, other features are same as Extrem Network 1.
 3. Testing Reddit: Imported Reddit network from data folder, then two players start fictitious play on the Reddit network until a Nash Equlibrium is found.
 4. Testing Twitter: Imported Twitter network from data folder, same procedure as Reddit Network. 
 5. Testing Karate: Imported Karate network from data folder, same procedure as Reddit Network. 
