@@ -10,9 +10,9 @@ This code has been written in Python. All neccessary packages have been included
 
 1. Testing Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
 2. Testing Extreme Network 2: Given a symmetric triangle network, except the network structure, other features are same as Extrem Network 1.
-3. Testing Reddit: Imported Reddit network from data folder, then two players start fictitious play on the Reddit network until a Nash Equlibrium is found.
-4. Testing Twitter: Imported Twitter network from data folder, same procedure as Reddit Network. 
-5. Testing Karate: Imported Karate network from data folder, same procedure as Reddit Network. 
+3. Final_Fictitious Play: Imported real network from data folder, then two players start fictitious play on the Reddit network until a Nash Equlibrium is found.
+4. Final_MaxMin Test: Imported real network from data folder, then start the stackelberg game. Maximizer knows all minimizer's action.  
+5. Final_MaxMin Test: Imported real network from data folder, then start the stackelberg game. Minimizer knows all maximizer's action.  
 6. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiemnt 
