@@ -18,14 +18,14 @@ This code has been written in Python. All neccessary packages have been included
 
 ## Running an Experiemnt 
 [Game]
-Players = 2\\
+Players = 2
 PayoffMatrix = True  ; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix \\
 Type = 1  ; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game \\
 payoff_function = 1  ; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function \\
 α = 1  ; α is the ratio parameter in the payoff function, can be any value between 0 and 1 \\
 
 [Algorithm]
-ConvergenceThreshold = 0.001
+ConvergenceThreshold = 0.01
 MaxIterations = 1000
 LearningRate = 0.1
 
