@@ -24,25 +24,25 @@ Type = 1  ; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game;
 payoff_function = 1  ; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function \\
 α = 1  ; α is the ratio parameter in the payoff function, can be any value between 0 and 1 \\
 
-[Algorithm]
-ConvergenceThreshold = 0.01
-MaxIterations = 1000
-LearningRate = 0.1
+[Algorithm] <br>
+ConvergenceThreshold = 0.01 <br>
+MaxIterations = 1000 <br>
+LearningRate = 0.1 <br>
 
-[Strategies]
-Player1 = θ1  ; Number of nodes player 1 can select at each pure action
-Player2 = θ1  ; Number of nodes player 2 can select at each pure action
+[Strategies] <br>
+Player1 = θ1  ; Number of nodes player 1 can select at each pure action <br>
+Player2 = θ1  ; Number of nodes player 2 can select at each pure action <br>
 
-[InitialConditions]
-PlayerStrategies = strategy1, strategyA  ; It can be random or a fixed starting strategy
-PlayerPayoffs = call payoff function
+[InitialConditions] <br>
+PlayerStrategies = strategy1, strategyA  ; It can be random or a fixed starting strategy <br>
+PlayerPayoffs = call payoff function <br>
 
-[Output]
-SaveIntermediateResults = true
-SaveConvergenceInfo = true
+[Output] <br>
+SaveIntermediateResults = true <br>
+SaveConvergenceInfo = true <br>
 
-[Execution]
-ParallelComputation = false
-RandomSeed = 12345
-RuntimeLimit = 60
+[Execution] <br>
+ParallelComputation = false <br>
+RandomSeed = 12345 <br>
+RuntimeLimit = 60 <br>
 
