@@ -17,21 +17,32 @@ This code has been written in Python. All neccessary packages have been included
 7. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiemnt 
-### 1. Initial Conditions
-At the first round, two players choose an action without considering another player's action. 
+[Game]
+Players = 2
+PayoffMatrix = True  ; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix
+Type = 1  ; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game
+payoff_function = 1  ; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function
+α = 1  ; α is the ratio parameter in the payoff function, can be any value between 0 and 1
 
-Above python code start the game with players' random actions in the first round by calling Random_play() function. Every time one run the expriment in the above 1-4 
-python code, the random_play() will generate random actions and overwrite last random action. Two players randomly choose an agent and change it's innate opnion to 0 
-or 1 without considering the effect to polarization. 
+[Algorithm]
+ConvergenceThreshold = 0.001
+MaxIterations = 1000
+LearningRate = 0.1
 
-The game can also start with players' intentional selection(i.e., in the first round, player 1 choose the action that maximize polarization, player 2 choose the action 
-that minimize polarization). To achieve this, comment out the line (v1, max_opinion) = random_play() at line and line, then uncomment (v1, max_opinion) = max_first_play() 
-at line xxx and (v2, min_opinion) = min_first_play() at line xxx.
+[Strategies]
+Player1 = θ1  ; Number of nodes player 1 can select at each pure action
+Player2 = θ1  ; Number of nodes player 2 can select at each pure action
 
-### 2. Innate Opinons and Network Structure
-One can change the innate opinion/structure of the network at the Section 2 in the code "Innate Opinions and Adjacency Matrix".
+[InitialConditions]
+PlayerStrategies = strategy1, strategyA  ; It can be random or a fixed starting strategy
+PlayerPayoffs = call payoff function
 
-### 3. Exit Out Situation
-If two players selected same agent at the first round, the game will exit out automatically. Since two players cannot choose the same agent in same round based on Game
-theory principal, the conditional Exit Out command is to avoid this happens. If one come across Exit Out situation, just run the game again, then the new random 
-actions will overwrite the previous actions. 
+[Output]
+SaveIntermediateResults = true
+SaveConvergenceInfo = true
+
+[Execution]
+ParallelComputation = false
+RandomSeed = 12345
+RuntimeLimit = 60
+
