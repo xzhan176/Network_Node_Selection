@@ -17,8 +17,8 @@ This code has been written in Python. All neccessary packages have been included
 7. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiemnt 
-[Game]
-Players = 2 <br>
+[Game] <br>
+Players = 2 <br> # This algorithm designed the game only for 2 players
 PayoffMatrix = True  ; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix <br>
 Type = 1  ; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game<br>
 payoff_function = 1  ; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function <br>
