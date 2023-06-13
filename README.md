@@ -18,7 +18,7 @@ This code has been written in Python. All neccessary packages have been included
 
 ## Running an Experiemnt 
 [Game]
-Players = 2
+Players = 2 <br>
 PayoffMatrix = True  ; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix <br>
 Type = 1  ; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game<br>
 payoff_function = 1  ; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function <br>
