@@ -18,11 +18,11 @@ This code has been written in Python. All neccessary packages have been included
 
 ## Running an Experiemnt 
 [Game] <br>
-Players = 2 <br> #This algorithm designed the game only for 2 players <br>
-PayoffMatrix = True  #True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix <br>
-Type = 1  #1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game<br>
-payoff_function = 1  #1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function <br>
-α = 1  #α is the ratio parameter in the payoff function, can be any value between 0 and 1<br>
+Players = 2; This algorithm designed the game only for 2 players <br>
+PayoffMatrix = True; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix <br>
+Type = 1; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg game; 4: Minimax Stackelberg game<br>
+payoff_function = 1; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: customized payoff function <br>
+α = 1; α is the ratio parameter in the payoff function, can be any value between 0 and 1<br>
 
 [Algorithm] <br>
 ConvergenceThreshold = 0.01 <br>
@@ -30,8 +30,8 @@ MaxIterations = 1000 <br>
 LearningRate = 0.1 <br>
 
 [Strategies] <br>
-Player1 = θ1  ; Number of nodes player 1 can select at each pure action <br>
-Player2 = θ1  ; Number of nodes player 2 can select at each pure action <br>
+\kappa_1 = θ1  ; Number of nodes player 1 can select at each pure action <br>
+\kappa_2 = θ1  ; Number of nodes player 2 can select at each pure action <br>
 
 [InitialConditions] <br>
 PlayerStrategies = strategy1, strategyA  ; It can be random or a fixed starting strategy <br>
