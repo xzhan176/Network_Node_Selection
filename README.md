@@ -46,3 +46,5 @@ ParallelComputation = false <br>
 RandomSeed = 12345 <br>
 RuntimeLimit = 60 <br>
 
+## \kappa Nodes Selection Algorithm
+![image](https://github.com/xzhan176/Network_Node_Selection/assets/73297832/28d0d57f-f8a6-4f5d-9ddf-6498a67b7ce3)
