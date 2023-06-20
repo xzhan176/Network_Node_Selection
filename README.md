@@ -6,17 +6,20 @@ This paper provides a quantitative analysis of a game over a social network of a
 
 
 ## Python Code
-This code has been written in Python. All neccessary packages have been included in the code. This directory contains the following documented Python files. 
+This code has been written in Python. All necessary packages have been included in the code. This directory contains the following documented Python files. 
 
-1. Testing Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
-2. Testing Extreme Network 2: Given a symmetric triangle network, except the network structure, other features are same as Extrem Network 1.
-3. Final_Fictitious Play: Imported real network from data folder, then two players start fictitious play on the Reddit network until a Nash Equlibrium is found.
-4. Final_k_node_Fictitious_Play: two player start fictitious play, each player can choose k nodes.
-5. Final_MaxMin Test: Imported real network from data folder, then start the stackelberg game. Maximizer knows all minimizer's action.  
-6. Final_MaxMin Test: Imported real network from data folder, then start the stackelberg game. Minimizer knows all maximizer's action.  
-7. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
+1. Final_nzs_Fictitious_Play: Imported network data, then two players start fictitious play where they cannot choose the same agents that are in another player's territory.
+2. Final_zs_Fictitious_Play: Import network data, then two players start fictitious play where they can choose the same agent in the network, but then both players' action effects will be canceled off.
+4. Final_MaxMin Test: Imported real network from the data folder, then start the Stackelberg game. Maximizer knows all minimizer's actions corresponding to each minimizer's action.  
+5. Final_MaxMin Test: Imported real network from the data folder, then start the Stackelberg game. Minimizer knows all maximizer's actions corresponding to each maximizer's action.
+6. Final_k_node_Fictitious_Play: two players start fictitious play, and each player can choose k nodes.
+7. Testing Extreme Network 1: Given a graph represented by the adjacency matrix, a vector of innate opinions(1, 0.5, 0), and the code for fictitious play that two players(Maximizer and Minimizer) play on the network until a Nash Equilibrium result is found.
+8. Testing Extreme Network 2: Given a symmetric triangle network, except for the network structure, other features are the same as Extrem Network 1.
+9. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
-## Running an Experiemnt 
+## Running an Experiment 
+The game requires several hyper-parameters that are listed below. An example of using a configuration file to pass all the following parameters to the game is included in the python_code folder.
+
 [Game] <br>
 Players = 2; This algorithm designed the game only for 2 players <br>
 PayoffMatrix = True; True: save payoff matrix; False: save the network data with label (selected nodes), not payoff matrix <br>
@@ -27,14 +30,13 @@ payoff_function = 1; 1: P(z) = α Polarization(z) + (1-α) Disagreement(z); 2: c
 [Algorithm] <br>
 ConvergenceThreshold = 0.01 <br>
 MaxIterations = 1000 <br>
-LearningRate = 0.1 <br>
 
 [Strategies] <br>
 \kappa_1 = θ1  ; Number of nodes player 1 can select at each pure action <br>
 \kappa_2 = θ1  ; Number of nodes player 2 can select at each pure action <br>
 
 [InitialConditions] <br>
-PlayerStrategies = strategy1, strategyA  ; It can be random or a fixed starting strategy <br>
+PlayerStrategies = strategy1, strategyA; It can be random or a fixed starting strategy <br>
 PlayerPayoffs = call payoff function <br>
 
 [Output] <br>
