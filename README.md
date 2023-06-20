@@ -18,7 +18,7 @@ This code has been written in Python. All necessary packages have been included 
 9. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() function if they are used.
 
 ## Running an Experiment 
-The game requires several hyper-parameters that are listed below. An example of using a configuration file to pass all the following parameters to the game is included in the python_code folder.
+The game requires several hyper-parameters that are listed below. An example of using a configuration file to pass all the following parameters to the game is included in the Python Code folder.
 
 [Game] <br>
 Players = 2; This algorithm designed the game only for 2 players <br>
