@@ -43,7 +43,7 @@ PlayerPayoffs = call payoff function <br>
 SaveIntermediateResults = true <br>
 SaveConvergenceInfo = true <br>
 
-If any problem occurs while running the code, please contact us at xzhan176@binghamton.edu.
+If any problem occurs via running the code, please contact us at xzhan176@binghamton.edu.
 ## k Nodes Selection Algorithm
 ![image](https://github.com/xzhan176/Network_Node_Selection/assets/73297832/28d0d57f-f8a6-4f5d-9ddf-6498a67b7ce3)
 
