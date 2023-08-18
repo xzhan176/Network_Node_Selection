@@ -26,12 +26,8 @@ GameType = 1; 1: Non-zero-sum game; 2: Zero-sum game; 3: Maximin Stackelberg gam
 ConvergenceThreshold = 0.01 <br>
 MaxIterations(K) = 1000 <br>
 
-[Strategies] <br>
-\kappa_1 = θ1  ; Number of nodes player 1 can select at each pure action <br>
-\kappa_2 = θ1  ; Number of nodes player 2 can select at each pure action <br>
-
 [InitialConditions] <br>
-Each game starts with a random action.
+Each game starts with a random action.<br>
 PlayerStrategies = action1(for Maximizer), actionA(for Minimizer); It can be random or a fixed starting strategy <br>
 PlayerPayoffs = call payoff function <br>
 
