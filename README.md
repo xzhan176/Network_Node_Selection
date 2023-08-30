@@ -11,7 +11,7 @@ This code has been written in Python. All necessary packages have been included 
 1. Final_nzs_Fictitious_Play: Imported network data, then two players start fictitious play where they cannot choose the same agents that are in another player's territory.
 2. Final_zs_Fictitious_Play: Import network data, then two players start fictitious play where they can choose the same agent in the network, but then both players' action effects will be canceled off.
 4. Final_MaxMin Test: Imported real network from the data folder, then start the Stackelberg game. Maximizer knows all minimizer's actions corresponding to each minimizer's action.  
-5. Final_MaxMin Test: Imported real network from the data folder, then start the Stackelberg game. Minimizer knows all maximizer's actions corresponding to each maximizer's action.
+5. Final_MinMax Test: Imported real network from the data folder, then start the Stackelberg game. Minimizer knows all maximizer's actions corresponding to each maximizer's action.
 6. pure_startegy_selection: this code contains functions to execute first-round greedy action for player 1 and player 2. It is called in max_fir_play() and min_fir_play() functions if they are used. No need to open it for running an experiment.
 
 ## Running an Experiment 
