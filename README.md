@@ -17,7 +17,7 @@ This code has been written in Python. All necessary packages have been included 
 The game requires several hyper-parameters that are listed below. An example of all the hyper-parameters used in the game is included in the Python Code folder.
 
 [InitialConditions] <br>
-Each game starts with a random action.<br>
+Each game starts with a given action for each player.<br>
 PlayerStrategies = action1(for Maximizer), actionA(for Minimizer); It can be random or a fixed starting strategy <br>
 PlayerPayoffs = call payoff function <br>
 
