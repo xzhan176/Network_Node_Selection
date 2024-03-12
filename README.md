@@ -8,9 +8,9 @@ This paper provides a quantitative analysis of a game over a social network of a
 ## Python Code
 This code has been written in Python. All necessary packages have been included in the code. This directory contains the following documented Python files. 
 
-1. Runfile_ZeroSum_Fictitious_Play: Read network data, then two players(Maximizer and Minimzier) start fictitious play, the algorithm is explained in the paper. 
-2. Karate: Python code importing Karate club network data. 
-3. Reddit: Python code importing Reddit network data. 
+1. Runfile-ZeroSum_Fictitious_Play.ipynb: Read network data, then two players(Maximizer and Minimzier) start fictitious play, the algorithm is explained in the paper. 
+2. Karate.ipynb: Python code importing Karate club network data. 
+3. Reddit.ipynb: Python code importing Reddit network data. 
 
 
 ## Running an Experiment 
