@@ -23,7 +23,7 @@ PlayerPayoffs = call payoff function <br>
 
 [Output] <br>
 SavePayoffMatrix = true <br>
-SaveConvergenceInfo = true <br>
+SaveGameConvergenceInfo = true <br>
 
 If any problem occurs while running the code, please contact us at xzhan176@binghamton.edu.
 
