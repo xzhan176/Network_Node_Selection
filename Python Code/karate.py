@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+from utils import rank
 
 
 def karate():
@@ -44,16 +45,6 @@ def karate():
     return G, s, n
 
 
-def rank(scores, agent):
-    ranks = 1
-    for i in scores:
-        if scores[agent] > scores[i]:
-            ranks += 1
-        elif scores[agent] == scores[i]:
-            ranks = ranks
-    return ranks
-
-
 def network_anl(s, n, G, agent):
 
     print(str(agent)+' opinion: ' + str(s[agent]))
@@ -68,7 +59,7 @@ def network_anl(s, n, G, agent):
     print("Opinion rank of this agent is : " + str(res))
 
     # print("___________________Max Analyze__________________________________________")
-    nxG = nx.from_numpy_matrix(G)
+    nxG = nx.from_numpy_array(G)
     # G = nx.karate_club_graph()
     print("_______________Degree Centrality___________________")
     deg_centrality = nx.degree_centrality(nxG)
