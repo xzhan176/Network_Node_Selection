@@ -4,9 +4,7 @@ import os
 import scipy.io
 import scipy
 import numpy as np
-import matplotlib.pyplot as plt
 import networkx as nx
-from scipy.stats import beta
 # %run pure_strategy_selection.ipynb  #include simple selection algorithm
 from utils import *
 
@@ -81,9 +79,6 @@ def reddit():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, "data/Reddit.mat")
 
-    # # Define the file path
-    # file_path = r"/Users/es2330/Downloads/12092023_PoGame/data/Reddit.mat"
-
     # Load the Reddit.mat file
     data = scipy.io.loadmat(file_path)
     n = data['Reddit'][0, 0][0].shape[0]     # number of vertices = 556
@@ -107,8 +102,7 @@ def reddit():
     G = np.delete(G, 52, 1)
     G = np.delete(G, 52, 0)
 
-    L = scipy.sparse.csgraph.laplacian(
-        G, normed=False)  # Return the Laplacian matrix
+    L = scipy.sparse.csgraph.laplacian(G, normed=False)  # Return the Laplacian matrix
     # A = (I + L)^(-1)\n  Stanford paper theory
     A = np.linalg.inv(np.identity(n) + L)
     # call the function to calculate the number of edges
