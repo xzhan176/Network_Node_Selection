@@ -4,6 +4,15 @@ import pandas as pd
 
 
 def karate():
+    """
+    Generates a Karate Club graph, creates an adjacency matrix, and generates innate opinions.
+
+    Returns:
+    - G: The Karate Club graph as a numpy array.
+    - s: The innate opinions as a numpy array.
+    - n: The number of agents in the graph.
+    """
+
     G = nx.karate_club_graph()
     edges = []
     n = 0
@@ -16,14 +25,13 @@ def karate():
 
     ############################ Make Adjacency Matrix #####################################
     ZKC_graph = nx.karate_club_graph()
-    # G = nx.convert_matrix.to_numpy_matrix(ZKC_graph)
     G = nx.convert_matrix.to_numpy_array(ZKC_graph)
     G[G != 0] = 1
     print(G)
 
     ############################ Make Innate Opinion ################################
-    # create two set of weights connected with density 1) inviduals  2) individual & informaton Source
-    # assume (1-r) are individuals
+    # create two set of weights connected with density 1) individuals  2) individual & information Source
+    # assuming (1-r) are individuals
     c1 = np.sort(np.random.choice(n, n, replace=False))
     l1 = len(c1)
 

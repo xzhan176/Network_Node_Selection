@@ -30,11 +30,11 @@ def num_edges(L, n):
 
 # maximizing polarization only: \\bar{z}^T \\bar{z}
 
-
-def obj_polarization(A, L, op, n):
-    op_mean = mean_center(op, n)
-    z_mean = np.dot(A, op_mean)
-    return np.dot(np.transpose(z_mean), z_mean)[0, 0]
+# TODO unused
+# def obj_polarization(A, L, op, n):
+#     op_mean = mean_center(op, n)
+#     z_mean = np.dot(A, op_mean)
+#     return np.dot(np.transpose(z_mean), z_mean)[0, 0]
 
 # def obj_polarization_1(A, L, op, n):  #z_mean is the same as s_mean - according to Stanford paper theory
 #     z = np.dot(A, op)
@@ -42,6 +42,8 @@ def obj_polarization(A, L, op, n):
 #     return np.dot(np.transpose(z_mean), z_mean)[0,0]
 
 # Calculate innate polarization
+
+# TODO unused
 
 
 def obj_innate_polarization(s, n):
