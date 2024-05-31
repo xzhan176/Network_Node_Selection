@@ -22,7 +22,7 @@ def karate():
         a = f"{G.degree(v):6}"
         edges.append(a)
         n = n + 1
-    print('There are ' + str(n) + ' agents')
+    print(f'There are {str(n)} agents')
 
     ############################ Make Adjacency Matrix #####################################
     ZKC_graph = nx.karate_club_graph()
@@ -46,7 +46,6 @@ def karate():
 
 
 def network_anl(s, n, G, agent):
-
     print(f'{str(agent)} opinion: {str(s[agent])}')
     print(f'{str(agent)} neighbors: {str(np.nonzero(G[agent]))}')
 
@@ -55,8 +54,7 @@ def network_anl(s, n, G, agent):
     sorting_s = sorted(my_dict.items(), key=lambda x: x[1])
     sorted_S = dict(sorting_s)
     res = rank(sorted_S, agent)
-    # printing result
-    print(f"Opinion rank of this agent is:\t{str(res)}")
+    print(f"Opinion rank of this agent is: {str(res)}")
 
     # print("___________________Max Analyze__________________________________________")
     nxG = nx.from_numpy_array(G)
@@ -68,8 +66,8 @@ def network_anl(s, n, G, agent):
     res1 = rank(converted_dict, agent)+1
     print(f"rank of this agent is:\t{str(res1)}")
     print(converted_dict[agent])
-
     # print(converted_dict)
+
     print("                           ")
     print("_______________Closeness Rank________________________")
     close_centrality = nx.closeness_centrality(nxG)
@@ -79,6 +77,7 @@ def network_anl(s, n, G, agent):
     print(f"rank of this agent is:\t{str(res2)}")
     print(converted_dict1[agent])
     # print(converted_dict1)
+
     print("                           ")
     print("_______________Page Rank_____________________________")
     pr = nx.eigenvector_centrality(nxG)
@@ -90,12 +89,6 @@ def network_anl(s, n, G, agent):
     # print(converted_dict3)
 
     print("                           ")
-
-    def get_gap(op, n):
-        ones = np.ones((n, 1))
-        x = op - (np.dot(np.transpose(op), ones)/n) * ones
-        return x
-
     gaps = get_gap(s, n)
     if gaps[agent] < 0:
         my_gap = {index: value for index,
