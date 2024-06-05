@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from utils import rank
+from utils import get_gap
 
 
 def karate():

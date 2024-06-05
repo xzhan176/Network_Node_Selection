@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from itertools import product, combinations
+
 
 def rank(scores, agent):
     ranks = 1
@@ -51,6 +53,8 @@ def obj_polarization(A, L, op, n):
 #     return np.dot(np.transpose(z_mean), z_mean)[0,0]
 
 # TODO unused
+
+
 def obj_innate_polarization(s, n):
     """Calculate innate polarization"""
     # np.set_printoptions(precision=5)
@@ -58,6 +62,8 @@ def obj_innate_polarization(s, n):
     return np.dot(np.transpose(op_mean), op_mean)[0, 0]
 
 #
+
+
 def len_actions(k, n):
     """Calculate the length of all possible actions for k opinions and n nodes"""
     # create all combination of K opinions
@@ -72,15 +78,18 @@ def len_actions(k, n):
     h = len(list(combinations(all, k)))*len_kops
     return h
 
+
 def calculate_centrality_and_convert_to_df(network, centrality_func):
     centrality = centrality_func(network)
     df = pd.DataFrame(list(centrality.values()))
     return df
 
+
 def get_gap(op, n):
     ones = np.ones((n, 1))
     x = op - (np.dot(np.transpose(op), ones)/n) * ones
     return x
+
 
 def plot_centrality_histogram(ax, df, title, ylim, is_reddit=False):
     ax.hist(df, bins=5, edgecolor='black', alpha=0.7)
