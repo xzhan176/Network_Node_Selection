@@ -18,14 +18,13 @@ def column_index(v1, max_opinion):
     column = 2*v1 + max_opinion
     return int(column)  # the python data frame index
 
-def random_play(s, n, A, L, avoid=None):
-    """player randomly chooses an agent and randomly change the agent"""
+def random_play(s, n, A, L):
+    """
+    Player randomly chooses an agent and randomly change the agent
+    """
     ops = copy.copy(s)
     # randomly select an agent index
-    while True:
-        v = random.randint(0, n-1)
-        if avoid is None or v != avoid:
-            break
+    v = random.randint(0, n-1)
     # print(v)
     # randomly select an opinion between 0 and 1
     # new_op = random.randint(0, 1)

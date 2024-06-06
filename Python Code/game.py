@@ -1,5 +1,6 @@
 import numpy as np
 import collections
+import sys
 from utils import *
 from gameutils import *
 
@@ -22,6 +23,12 @@ class GameResult:
 
 
 class Game:
+    # params:
+    # payoff_matrix size
+    # max_history shape
+    # max_history_last_100 shape
+    # random_play vs k_random_play
+
     def run(self, game_rounds, memory, s, n, A, L):
         op = copy.copy(s)
         payoff_matrix = np.empty((0, 2*n), float)
@@ -61,7 +68,15 @@ class Game:
 
         # if game start from minimizer random play - make sure two random play are not same agent!!!
         # print('Minimizer first selection')
-        v2, min_opinion, min_pol = random_play(op, n, A, L, avoid=v1)
+
+        while True:
+            retry = 0
+            v2, min_opinion, min_pol = random_play(op, n, A, L)
+            if retry == 10:
+                print('failed to attempt to sample v2 different from v1')
+                sys.exit()
+            if v1 != v2:
+                break
 
         first_min = (v2, min_opinion, min_pol)
 
@@ -126,14 +141,14 @@ class Game:
                 # if Game_round = 200, after 100 iteration,
                 # Game 101 print previous historical result
                 if i == game_rounds-100:
-                    #             max_touched_100 = max_touched
-                    #             min_touched_100 = min_touched
-                    #             max_fre_100 = max_frequency  # store the max_frequency of first 100 iterations
-                    #             print('max_history')
-                    #             print(max_history)
-                    #             min_fre_100 = fla_min_fre  # max_frequency of first 100 iterations
-                    #             print('min_history')
-                    #             print(min_history)
+                    # max_touched_100 = max_touched
+                    # min_touched_100 = min_touched
+                    # max_fre_100 = max_frequency  # store the max_frequency of first 100 iterations
+                    # print('max_history')
+                    # print(max_history)
+                    # min_fre_100 = fla_min_fre  # max_frequency of first 100 iterations
+                    # print('min_history')
+                    # print(min_history)
                     # Remove max frequency less than 0.1--
                     max_history_last_100 = np.zeros([n, 2])
                     min_history_last_100 = []
@@ -214,12 +229,10 @@ class Game:
                     # print(payoff_matrix.shape)
                 min_history.append((v2, round(min_opinion, 2)))
                 min_history_last_100.append((v2, round(min_opinion)))
-                #         print('min_history')
-                #         print(min_history)
+                # print('min_history')
+                # print(min_history)
                 # return a dictionary include {'min_option': count of this choice}
                 counter = collections.Counter(min_history)
-                # print(counter)
-                # print(f'counter.keys:\t{counter.keys()}')
                 # return only frequency of all min options in order
                 fla_min_fre = np.array(list(counter.values()))/(i+1)
                 # print(f'fla_min_fre:\t{fla_min_fre}')
