@@ -22,8 +22,8 @@ def karate():
     for v in G:
         a = f"{G.degree(v):6}"
         edges.append(a)
-        n = n + 1
-    print(f'There are {str(n)} agents')
+        n += 1
+    print(f'There are {n} agents')
 
     ############################ Make Adjacency Matrix #####################################
     ZKC_graph = nx.karate_club_graph()

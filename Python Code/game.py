@@ -52,19 +52,19 @@ class Game:
         max_touched.append(v1)
 
         # store maximizer play history, using agent(row) and changed opinion(column) as indicator to locate history
-        ##################################### Remove first random action from the history############
+        ################ Remove first random action from the history############
         max_history[v1, int(max_opinion)] += 1
 
         # its frequency, only played 1 time so far, divided by 1
         max_frequency = max_history / 1
 
+        column = column_index(v1, max_opinion)
+
         # flatten the n*2 matrix to a 2n*1 matrix
         fla_max_fre = max_frequency.flatten()
-        print(f'fre_max at spot: {fla_max_fre}')
+        print(f'fre_max at spot: {fla_max_fre[column]}')
 
         # the frequency of maximizer's most recent action (v1,max_opinion)
-        column = column_index(v1, max_opinion)
-        print(fla_max_fre[column])
 
         # if game start from minimizer random play - make sure two random play are not same agent!!!
         # print('Minimizer first selection')
@@ -77,6 +77,9 @@ class Game:
                 sys.exit()
             if v1 != v2:
                 break
+
+        print(f'v1 {v1}')
+        print(f'v2 {v2}')
 
         first_min = (v2, min_opinion, min_pol)
 

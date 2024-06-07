@@ -42,7 +42,9 @@ def get_node_edges(G, n):
 
 
 def obj_polarization(A, L, op, n):
-    # maximizing polarization only: \\bar{z}^T \\bar{z}
+    """
+    maximizing polarization only: \\bar{z}^T \\bar{z}
+    """
     op_mean = mean_center(op, n)
     z_mean = np.dot(A, op_mean)
     return np.dot(np.transpose(z_mean), z_mean)[0, 0]
@@ -61,21 +63,18 @@ def obj_innate_polarization(s, n):
     op_mean = mean_center(s, n)
     return np.dot(np.transpose(op_mean), op_mean)[0, 0]
 
-#
-
 
 def len_actions(k, n):
-    """Calculate the length of all possible actions for k opinions and n nodes"""
+    """
+    Calculate the length of all possible actions for k opinions and n nodes
+    """
     # create all combination of K opinions
     max_option = [0, 1]
-    k_opinions = []
-    for max_option in product(max_option, repeat=k):
-        k_opinions.append(max_option)   # Append all k opinion combinations
-
-    len_kops = len(k_opinions)  # - number of combinations exist
+    k_opinions = list(product(max_option, repeat=k))
     # Horizontal length of all possible actions
-    all = list(range(n))    # for all nodes
-    h = len(list(combinations(all, k)))*len_kops
+    all = list(range(n))
+    # all possible actions = all combination of k nodes * all combination of k opinions
+    h = len(list(combinations(all, k))) * len(k_opinions)
     return h
 
 
@@ -91,15 +90,13 @@ def get_gap(op, n):
     return x
 
 
-def plot_centrality_histogram(ax, df, title, ylim, is_reddit=False):
+def plot_centrality_histogram(ax, df, title, ylim):
     ax.hist(df, bins=5, edgecolor='black', alpha=0.7)
     ax.set_title(title, fontsize=18)
     ax.set_ylabel('Number of Nodes', fontsize=16)
     ax.set_ylim(0, ylim)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)
-    if is_reddit:
-        ax.set_ylim(0, 350)
 
 
 def calculate_polarization(s, n, A, L):

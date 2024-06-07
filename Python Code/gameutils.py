@@ -24,29 +24,29 @@ def random_play(s, n, A, L):
     """
     ops = copy.copy(s)
     # randomly select an agent index
-    v = random.randint(0, n-1)
-    # print(v)
+    v_index = random.randint(0, n-1)
     # randomly select an opinion between 0 and 1
-    # new_op = random.randint(0, 1)
+    # TODO confirm which one is correct
+    # new_opinion = random.randint(0, 1)
     new_opinion = random.uniform(0, 1)
-    print(f'new_op: {new_opinion}')
+    # print(f'new_op: {new_opinion}')
 
     # Store old opinion
-    old_opinion = ops[v, 0]
+    old_opinion = ops[v_index, 0]
 
     # update the opinion
-    ops[v, 0] = new_opinion
+    ops[v_index, 0] = new_opinion
     # print('Only 1 opinion changed')
     # print(op)
-    print(f"    Agent{str(v)}'s opinion {str(old_opinion)} changed to {str(new_opinion)}")
+    print(f"    Agent{v_index}'s opinion {old_opinion} changed to {new_opinion}")
     polar = obj_polarization(A, L, ops, n)
 
-    # restore op op array to innate opinion
-    ops[v] = old_opinion
+    # restore op array to innate opinion
+    ops[v_index] = old_opinion
     print(f"Network reaches equilibrium Polarization: {polar}")
     # print('Should be restored')
     # print(op)
-    return (v, new_opinion, polar)
+    return (v_index, new_opinion, polar)
 
 def make_payoff_row(op1, v2, s, n, A, L):
     payoff_row = np.zeros(2*n)
