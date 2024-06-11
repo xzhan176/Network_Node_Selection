@@ -5,13 +5,16 @@ import scipy.io
 import scipy
 import numpy as np
 import networkx as nx
+import sys
+
+# add parent directory to path so that utils is available
+sys.path.append('..')
 from utils import num_edges, get_gap
-# %run pure_strategy_selection.ipynb  #include simple selection algorithm
 
 
-def reddit():
+def init():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, "data/Reddit.mat")
+    file_path = os.path.join(script_dir, "../data/Reddit.mat")
 
     # Load the Reddit.mat file
     data = scipy.io.loadmat(file_path)

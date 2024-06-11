@@ -1,11 +1,14 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
-from utils import rank
-from utils import get_gap
+import sys
+
+# add parent directory to path so that utils is available
+sys.path.append('..')
+from utils import rank, get_gap
 
 
-def karate():
+def init():
     """
     Generates a Karate Club graph, creates an adjacency matrix, and generates innate opinions.
 

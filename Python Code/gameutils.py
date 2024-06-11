@@ -299,7 +299,7 @@ def mixed_min_play(s, v1, max_opinion, n, A, L, fla_max_fre):
         # old_opinion_min = op[v2, 0]
         old_opinion_min = s[v2, 0]
 
-        print(f"    Agent{str(v2)}'s opinion {str(old_opinion_min)} changed to {str(min_opinion)}")
+        print(f"    Agent{v2}'s opinion {old_opinion_min} changed to {min_opinion}")
         # print('fla_max_fre')
         # print(np.nonzero(fla_max_fre))
         # print(fla_max_fre [np.nonzero(fla_max_fre)])
@@ -351,8 +351,7 @@ def max_mixed_opinion(payoff_matrix, n, v1, fla_min_fre):
         por_arr[j] = mixed_max_polarization(payoff_matrix, v1, max_opinion, fla_min_fre)
         j = j + 1   # index increase 1, put the polarization in array
 
-    # print('Polarization Options')
-    # print(por_arr)
+    # print(f'Polarization Options {por_arr}')
 
     # the index of maximum polarization = max_opinion --[0,1]
     maximize_op = np.argmax(por_arr)
@@ -423,7 +422,7 @@ def mixed_max_play(payoff_matrix, s, n, A, L, v2, min_opinion, fla_min_fre):
         max_opinion = s[v1, 0]
 
         # check if agent's opinion is changed or not
-    print(f"    Agent{str(v1)}'s opinion {str(old_opinion_max)} changed to {str(max_opinion)}")
+    print(f"    Agent{v1}'s opinion {old_opinion_max} changed to {max_opinion}")
     # print(f"Network reaches equilibrium Polarization: {str(max_pol)}")
     # print('2 opinion changed')
     # print(op)
