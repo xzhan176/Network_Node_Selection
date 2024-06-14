@@ -40,7 +40,6 @@ def get_node_edges(G, n):
     for v in range(n):
         a = np.array(np.nonzero(G[v])[0])
         edge = len(a)
-#         print(edge)
         edges.append(edge)
 
     return edges
@@ -53,11 +52,6 @@ def obj_polarization(A, L, op, n):
     op_mean = mean_center(op, n)
     z_mean = np.dot(A, op_mean)
     return np.dot(np.transpose(z_mean), z_mean)[0, 0]
-
-# def obj_polarization_1(A, L, op, n):  #z_mean is the same as s_mean - according to Stanford paper theory
-#     z = np.dot(A, op)
-#     z_mean = mean_center(z, n)
-#     return np.dot(np.transpose(z_mean), z_mean)[0,0]
 
 
 def obj_innate_polarization(s, n):

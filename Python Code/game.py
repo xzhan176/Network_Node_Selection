@@ -6,7 +6,7 @@ from gameutils import *
 
 
 class GameResult:
-    def __init__(self, first_max, first_min, min_touched, max_touched,  payoff_matrix, min_touched_last_100, min_touched_all, fla_min_fre, fla_max_fre, min_history, max_history, min_history_last_100,    max_history_last_100):
+    def __init__(self, first_max, first_min, min_touched, max_touched,  payoff_matrix, min_touched_last_100, min_touched_all, fla_min_fre, fla_max_fre, min_history, max_history, min_history_last_100, max_history_last_100):
         self.first_max = first_max
         self.first_min = first_min
         self.min_touched = min_touched
@@ -46,7 +46,6 @@ class Game:
         max_touched.append(v1)
 
         # store maximizer play history, using agent(row) and changed opinion(column) as indicator to locate history
-        ################ Remove first random action from the history############
         max_history[v1, int(max_opinion)] += 1
 
         # its frequency, only played 1 time so far, divided by 1
@@ -61,16 +60,15 @@ class Game:
         # the frequency of maximizer's most recent action (v1,max_opinion)
 
         # if game start from minimizer random play - make sure two random play are not same agent!!!
-        # print('Minimizer first selection')
-
         while True:
             retry = 0
             v2, min_opinion, min_pol = random_play(op, n, A, L)
-            if retry == 10:
-                print('failed to attempt to sample v2 different from v1')
-                sys.exit()
             if v1 != v2:
                 break
+            elif retry == 10:
+                print('failed to attempt to sample v2 different from v1')
+                sys.exit()
+            retry += 1
 
         print(f'v1 {v1}')
         print(f'v2 {v2}')
@@ -78,31 +76,27 @@ class Game:
         first_min = (v2, min_opinion, min_pol)
 
         # Minimizer start with greedy play
-        # (v2, min_opinion, min_pol) = minimizer_fir_play(s,n,max_touched)
         min_touched.append(v2)
 
         # store minimizer play history
         min_history.append((v2, min_opinion))
         print(f'min_history: {min_history}')
 
-        # return a dictionary include {'min_option': count of this choice}
+        # a dictionary {'min_option': count of this choice}
         counter = collections.Counter(min_history)
         print(counter)
 
-        # return only frequency of all min options in order
+        # frequency of all min options in order
         fla_min_fre = np.array(list(counter.values()))/1
-        # print(f'fla_min_fre: {fla_min_fre}')
 
         mixed_pol, payoff_row = mixed_min_polarization(
             s, n, A, L, v2, min_opinion, fla_max_fre)
         payoff_matrix = np.vstack([payoff_matrix, payoff_row])
-        # print(f'Payoff Matrix: {payoff_matrix}')
         print('fla_min_fre at the spot')
 
         min_counter = dict(counter)
-        print(min_counter)
+        print(f'min_counter: {min_counter}')
         print(min_counter[(v2, min_opinion)])
-        # print(min_counter[(v2,min_opinion)]/(i+1)) #get the value from dictionary by using key (v2,opinion)
 
         equi_min = min_pol
         equi_max = max_pol
@@ -125,6 +119,7 @@ class Game:
             # Game 101 print previous historical result
             # if i == game_rounds-100:
             if i % 100 == 0:
+                # TODO should we remove these commented code?
                 # max_touched_100 = max_touched
                 # min_touched_100 = min_touched
                 # max_fre_100 = max_frequency  # store the max_frequency of first 100 iterations
@@ -136,7 +131,8 @@ class Game:
                 min_history_last_100 = []
                 min_touched_last_100 = []
 
-            (v1, max_opinion, equi_max) = mixed_max_play(payoff_matrix, s, n, A, L, v2, min_opinion, fla_min_fre)
+            (v1, max_opinion, equi_max) = mixed_max_play(
+                payoff_matrix, s, n, A, L, v2, min_opinion, fla_min_fre)
             max_touched = push(max_touched, v1, memory)
 
             # cumulate strategy
@@ -185,9 +181,9 @@ class Game:
 
             min_history.append((v2, round(min_opinion, 2)))
             min_history_last_100.append((v2, round(min_opinion)))
-            # return a dictionary include {'min_option': count of this choice}
+            # dictionary {'min_option': count of this choice}
             counter = collections.Counter(min_history)
-            # return only frequency of all min options in order
+            # frequency of all min options in order
             fla_min_fre = np.array(list(counter.values()))/(i+1)
 
             # min_counter = dict(counter)
@@ -197,7 +193,8 @@ class Game:
             row = row_index(v2, min_opinion)
             column = column_index(v1, max_opinion)
 
-            print(f"Not Reached Nash Equilibrium at Equi_Min = {equi_min} and Equi_Max = {equi_max}")
+            print(
+                f"Not Reached Nash Equilibrium at Equi_Min = {equi_min} and Equi_Max = {equi_max}")
 
             # Visualize Minimizer selection
             # La = scipy.sparse.csgraph.laplacian(G1, normed=False)
