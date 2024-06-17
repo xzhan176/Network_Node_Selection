@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import importlib
+import networkx as nx
 from itertools import product, combinations
 
 
@@ -114,3 +115,60 @@ def calculate_polarization1(s, n, A, L):
 
 def import_network(name):
     return importlib.import_module(f'networks.{name}')
+
+def network_anl(s, n, G, agent):
+    print(f'{agent} opinion: {s[agent]}')
+    print(f'{agent} neighbors: {np.nonzero(G[agent])}')
+
+    s_aa = s[:, 0]
+    my_dict = {index: value for index, value in enumerate(s_aa)}
+    sorting_s = sorted(my_dict.items(), key=lambda x: x[1])
+
+    sorted_S = dict(sorting_s)
+    res = rank(sorted_S, agent)
+    print(f"Opinion rank of this agent is: {res}")
+
+    nxG = nx.from_numpy_array(G)
+    print("_______________Degree Centrality___________________")
+    deg_centrality = nx.degree_centrality(nxG)
+    sortedDict = sorted(deg_centrality.items(), key=lambda x: x[1])
+    converted_dict = dict(sortedDict)
+    res1 = rank(converted_dict, agent)+1
+    print(f"rank of this agent is:\t{res1}")
+    print(converted_dict[agent])
+    # print(converted_dict)
+
+    print("\n_______________Closeness Rank________________________")
+    close_centrality = nx.closeness_centrality(nxG)
+    sortedDict1 = sorted(close_centrality.items(), key=lambda x: x[1])
+    converted_dict1 = dict(sortedDict1)
+    res2 = rank(converted_dict1, agent)+1
+    print(f"rank of this agent is:\t{res2}")
+    print(converted_dict1[agent])
+    # print(converted_dict1)
+
+    print("\n_______________Page Rank_____________________________")
+    pr = nx.eigenvector_centrality(nxG)
+    sortedDict3 = sorted(pr.items(), key=lambda x: x[1])
+    converted_dict3 = dict(sortedDict3)
+    res3 = rank(converted_dict3, agent)+1
+    print(f"rank of this agent is:\t{str(res3)}")
+    print(converted_dict3[agent])
+    # print(converted_dict3)
+
+    gaps = get_gap(s, n)
+    if gaps[agent] < 0:
+        my_gap = {index: value for index, value in enumerate(gaps) if value < 0}
+        sorting_gap = sorted(my_gap.items(), key=lambda x: x[1])
+        sorted_gap = dict(sorting_gap)
+        res4 = rank(sorted_gap, agent)
+    else:
+        my_gap = {index: value for index, value in enumerate(gaps) if value >= 0}
+        sorting_gap = sorted(my_gap.items(), key=lambda x: x[1], reverse=True)
+        sorted_gap = dict(sorting_gap)
+        res4 = rank(sorted_gap, agent)
+
+    print(f"Agent's opinion extremity is ranked as:\t{res4}")
+    print(f"Agent's min_pref is ranked as:\t{res4+res1}")
+
+
