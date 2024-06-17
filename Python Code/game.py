@@ -213,14 +213,14 @@ class Game:
             # plt.figure(figsize=(25, 25))
             # plt.show()
 
-            i += 1
-
             if equi_min == equi_max:
                 print(
                     f"Reached Nash Equilibrium at game {i} and Equi_Por = {equi_min}")
                 print(f'max_distribution:\t{max_frequency}')
                 print(f'min_distribution:\t{fla_min_fre}')
                 break
+
+            i += 1
 
         return GameResult(
             first_max=first_max,
