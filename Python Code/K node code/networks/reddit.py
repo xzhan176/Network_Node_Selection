@@ -4,10 +4,6 @@ import os
 import scipy.io
 import scipy
 import numpy as np
-import sys
-
-# add parent directory to path so that utils is available
-sys.path.append('..')
 
 
 def init():
