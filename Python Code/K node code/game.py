@@ -1,45 +1,14 @@
-import numpy as np
-import collections
-import copy
-import random
-import sys
 from math import comb
-from utils import *
+import sys
+import random
+import copy
+import collections
+import numpy as np
 
 # add parent directory to path so that utils is available
 sys.path.append('..')
 
-
-def len_actions(k, n):
-    """
-    Calculate the length of all possible actions for k opinions and n nodes
-    All possible actions = all combination of k nodes (unordered) * all combination of k opinions (ordered)
-    """
-    # create all combination of k opinions
-    max_option = [0, 1]
-    k_opinions = list(product(max_option, repeat=k))
-    # number of combinations exist
-    len_kops = len(k_opinions)
-    # Horizontal length of all possible actions
-    h = comb(n,k) * len_kops
-    return h
-
-
-def cgen(i, n, k):
-    """
-    returns the i-th combination of k numbers chosen from 1,2,...,n
-    """
-    c = []
-    r = i+0
-    j = -1
-    for s in range(1, k+1):
-        cs = j+1
-        while r-comb(n-1-cs, k-s) >= 0:
-            r -= comb(n-1-cs, k-s)
-            cs += 1
-        c.append(cs)
-        j = cs
-    return c
+from utils import *
 
 
 class GameResult:
@@ -77,11 +46,50 @@ class Game:
         self.A = A
         self.L = L
         self.k = k
-        self.h = len_actions(k, self.n)
+        self.h = self._len_actions(k, self.n)
         pass
 
     def setK(self, k):
         self.k = k
+
+    def map_action(self, column):
+        k_opinions = self._create_all_comb()
+        len_kops = len(k_opinions)
+        nodeset_index = int(column / len_kops)
+        opset_index = column % len_kops
+        k_nodes = self._cgen(nodeset_index, self.n, self.k)
+        opinions = k_opinions[opset_index]
+        return (k_nodes, opinions)
+
+    def _len_actions(self, k, n):
+        """
+        Calculate the length of all possible actions for k opinions and n nodes
+        All possible actions = all combination of k nodes (unordered) * all combination of k opinions (ordered)
+        """
+        # create all combination of k opinions
+        max_option = [0, 1]
+        k_opinions = list(product(max_option, repeat=k))
+        # number of combinations exist
+        len_kops = len(k_opinions)
+        # Horizontal length of all possible actions
+        h = comb(n, k) * len_kops
+        return h
+
+    def _cgen(self, i, n, k):
+        """
+        returns the i-th combination of k numbers chosen from 1,2,...,n
+        """
+        c = []
+        r = i+0
+        j = -1
+        for s in range(1, k+1):
+            cs = j+1
+            while r-comb(n-1-cs, k-s) >= 0:
+                r -= comb(n-1-cs, k-s)
+                cs += 1
+            c.append(cs)
+            j = cs
+        return c
 
     def _find_idx(self, k_nodes):
         latter = 0
@@ -102,15 +110,6 @@ class Game:
             latter = before
 
         return index
-
-    def _map_action(self, column):
-        k_opinions = self._create_all_comb()
-        len_kops = len(k_opinions)
-        nodeset_index = int(column / len_kops)
-        opset_index = column%len_kops
-        k_nodes = cgen(nodeset_index, self.n, self.k)
-        opinions = k_opinions[opset_index]
-        return (k_nodes, opinions)
 
     def _k_derivate_s(self, v2, M):
         '''
@@ -155,41 +154,12 @@ class Game:
                     k_nodes[j] = k_nodes[j] + 1
         return k_nodes
 
-    # def _create_all_comb(self):
-    #     '''
-    #     create all combination of k opinions
-    #     '''
-    #     max_option = [0, 1]
-    #     k_opinions = []
-    #     # all k opinion combinations
-    #     k_opinions = list(product(max_option, repeat=self.k))
-    #     # slower version of k_opinions
-    #     #     for max_option in product(max_option, repeat=k):
-    #     #         k_opinions.append(max_option)
-
     def _create_all_comb(self):
         '''
         create all combination of k opinions
         '''
         max_option = [0, 1]
         return list(product(max_option, repeat=self.k))
-
-    #     all = list(range(self.n))
-    #     # all possible actions
-    #     all_sets = list(combinations(all, self.k))
-    #     return (all_sets, k_opinions)
-
-    # def _create_available_comb(self, touched):
-    #     '''
-    #     create available combination of K nodes
-    #     '''
-
-    #     all = list(range(self.n))
-    #     # for the nodes that Min/Maximizer has not touched
-    #     C1 = [x for x in all if x not in touched]
-    #     # all combination of k nodes
-    #     node_sets = list(combinations(C1, self.k))
-    #     return node_sets
 
     def _create_available_comb(self, i_th, touched):
         '''
@@ -198,7 +168,7 @@ class Game:
         # number of unique touched nodes
         a = len(set(touched))
         # generate the i-th list from total n-a agents
-        k_fake = cgen(i_th, self.n - a, self.k)
+        k_fake = self._cgen(i_th, self.n - a, self.k)
         # convert the i-th list to real k nodes
         k_nodes = self._convert_available(k_fake, touched)
         return k_nodes
@@ -252,7 +222,7 @@ class Game:
 
         # i - which set of nodes option
         for i in range(0, comb(self.n, self.k)):
-            nodes = cgen(i, self.n, self.k)
+            nodes = self._cgen(i, self.n, self.k)
             k_opinions = self._create_all_comb()
 
             # tuple index - select one combination of opinions
@@ -289,43 +259,6 @@ class Game:
         mixed_pol = np.sum(payoff_cal)  # add up
         return mixed_pol
 
-    # def _k_random_play(self):
-    #     '''
-    #     Player randomly choose an agent and randomly change the agent
-    #     '''
-    #     # create all combination of K nodes
-    #     all = list(range(self.n))
-    #     # - all combination of k nodes
-    #     node_sets = list(combinations(all, self.k))
-    #     len_nodesets = len(node_sets)
-    #     # randomly select an agent index
-    #     v_index = random.randint(0, len_nodesets-1)
-    #     v_list = node_sets[v_index]
-
-    #     # create all combination of K opinions
-    #     max_option = [0, 1]
-    #     k_opinions = []
-    #     # Append all k opinion combinations
-    #     k_opinions = [max_option for max_option in product(
-    #         max_option, repeat=self.k)]
-    #     # number of combinations exist
-    #     len_kops = len(k_opinions)
-    #     # randomly select index for an OPINION list
-    #     op_index = random.randint(0, len_kops-1)
-    #     # randomly select an opinion list (0 and 1) to update the opinion array
-    #     new_op = k_opinions[op_index]
-    #     # print('Nodes, opinions')
-    #     # print(v_list,new_op)
-    #     # print(new_op)
-    #     op = self._change_k_innate_opinion(self.s, v_list, new_op)
-
-    #     por = obj_polarization(self.A, op, self.n)
-
-    #     column = len_kops*v_index + op_index
-    #     # print(f"Network reaches stead_state Polarization: {por}")
-
-    #     return (v_list, new_op, por, column)
-
     def _k_random_play(self):
         '''
         Player randomly choose an agent and randomly change the agent
@@ -334,7 +267,7 @@ class Game:
         len_nodesets = comb(self.n, self.k)
         # randomly select an agent index
         i_th = random.randint(0, len_nodesets-1)
-        v_list = cgen(i_th, self.n, self.k)
+        v_list = self._cgen(i_th, self.n, self.k)
 
         # create all combination of K opinions
         len_kops = len(k_opinions)  # - number of combinations exist
@@ -348,35 +281,6 @@ class Game:
         por = obj_polarization(self.A, op, self.n)
         column = len_kops*i_th + op_index
         return (v_list, new_op, por, column)
-
-    # def _k_random_play_1(self, touched):
-    #     '''
-    #     Player randomly choose an agent and randomly change the agent.
-    #     Will not choose the agent that has been touched by the maximizer.
-    #     '''
-    #     op = copy.copy(self.s)
-    #     # max_opi_option = random.uniform(0, 1)   # options that maximizer have
-
-    #     node_sets = self._create_available_comb(touched)
-    #     len_nodesets = len(node_sets)
-
-    #     # randomly select an agent index
-    #     v_n = random.randint(0, len_nodesets-1)
-    #     v_list = node_sets[v_n]
-
-    #     new_op_list = []
-    #     for i in range(self.k):
-    #         # new_op = random.uniform(0, 1)  # randomly select an opinion between 0 and 1
-    #         new_op = 0.5
-    #         new_op_list.append(new_op)
-
-    #     new_op_list = tuple(new_op_list)
-    #     # print('Nodes, opinions')
-    #     # print(v_list,new_op_list)
-    #     op = self._change_k_innate_opinion(self.s, v_list, new_op_list)
-    #     por = obj_polarization(self.A, op, self.n)
-    #     # print(f"Network reaches steady-state Polarization: {por}")
-    #     return (v_list, new_op_list, por)
 
     def _k_random_play_1(self, touched):
         '''
@@ -467,9 +371,10 @@ class Game:
         column = np.argmax(all_por)
         print(f'column - best action: {column}')
 
-        (v1, max_opinion) = self._map_action(column)
+        (v1, max_opinion) = self.map_action(column)
 
-        print(f"Maximizer found its target {self.k} agent: {v1} op: {max_opinion}")
+        print(
+            f"Maximizer found its target {self.k} agent: {v1} op: {max_opinion}")
 
         return (v1, max_opinion, np.max(all_por), column)
 
@@ -479,7 +384,7 @@ class Game:
         '''
         # min_por- set a standard to compare with pol after min's action
         # min_por = obj_polarization(self.A, op, self.n)
-        min_por = 1000 # store innate max updated polarization
+        min_por = 1000  # store innate max updated polarization
         champion = (None, None, 0, None)  # assume the best action is champion
 
         a = len(set(max_touched))
@@ -541,7 +446,7 @@ class Game:
                     opset_index = column
 
                 # Calculating Max's action at this column
-                v1 = cgen(nodeset_index, self.n, self.k)
+                v1 = self._cgen(nodeset_index, self.n, self.k)
                 max_opinion = k_opinions[opset_index]
 
                 # change innate opinion by max action
@@ -594,7 +499,6 @@ class Game:
         return (k_opinion, payoff_row, mixed_por)
 
     def run(self, game_rounds: int, memory: int):
-        op = copy.copy(self.s)
         payoff_matrix = np.empty((0, self.h), float)
         max_touched = []
         min_touched = []
@@ -673,7 +577,7 @@ class Game:
                     len_kops = len(k_opinions)
                     nodeset_index = int(column/len_kops)
                     opset_index = column % len_kops
-                    k_nodes = cgen(nodeset_index, self.n, self.k)
+                    k_nodes = self._cgen(nodeset_index, self.n, self.k)
                     opinions = k_opinions[opset_index]
                     print(f'Max Nodes: {k_nodes} | Opinion: {opinions}')
 
@@ -712,13 +616,14 @@ class Game:
             print(f'fre_max at spot {fla_max_fre[column]}')
 
             # MINimizer play
-            (v2, payoff_row, min_opinion, equi_min) = self._mixed_min_play(max_touched, fla_max_fre)
+            (v2, payoff_row, min_opinion, equi_min) = self._mixed_min_play(
+                max_touched, fla_max_fre)
             min_touched = self._push(min_touched, v2, memory)
             min_touched_all.append(v2)
             min_touched_last_100.append(v2)
 
             if tuple(tuple(v2) + min_opinion) in counter.keys():
-            # if (v2, tuple(min_opinion)) in counter.keys():
+                # if (v2, tuple(min_opinion)) in counter.keys():
                 # if this min_option is in min_history, no need to update payoff matrix, only update frequency
                 payoff_matrix = payoff_matrix
             else:
