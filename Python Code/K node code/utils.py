@@ -85,7 +85,7 @@ def plot_centrality_histogram(ax, df, title, bins, ylim):
     ax.tick_params(axis='y', labelsize=16)
 
 
-def calculate_polarization1(s, n, A, L):
+def calculate_polarization(s, n, A, L):
     y = mean_center(s, n)
     # Polarization before opinion dynamics
     innat_pol = np.dot(np.transpose(y), y)[0, 0]
