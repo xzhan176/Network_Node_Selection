@@ -49,17 +49,7 @@ class Game:
         self.h = self._len_actions(k, self.n)
         pass
 
-    def setK(self, k):
-        self.k = k
-
-    def map_action(self, column):
-        k_opinions = self._create_all_comb()
-        len_kops = len(k_opinions)
-        nodeset_index = int(column / len_kops)
-        opset_index = column % len_kops
-        k_nodes = self._cgen(nodeset_index, self.n, self.k)
-        opinions = k_opinions[opset_index]
-        return (k_nodes, opinions)
+    ## PRIVATE METHODS ##
 
     def _len_actions(self, k, n):
         """
@@ -371,12 +361,12 @@ class Game:
         column = np.argmax(all_por)
         print(f'column - best action: {column}')
 
-        (v1, max_opinion) = self.map_action(column)
+        v1, max_opinion = self.map_action(column)
 
         print(
             f"Maximizer found its target {self.k} agent: {v1} op: {max_opinion}")
 
-        return (v1, max_opinion, np.max(all_por), column)
+        return v1, max_opinion, np.max(all_por), column
 
     def _mixed_choose_min_vertex(self, max_touched, fla_max_fre):
         '''
@@ -384,7 +374,8 @@ class Game:
         '''
         # min_por- set a standard to compare with pol after min's action
         # min_por = obj_polarization(self.A, op, self.n)
-        min_por = 1000  # store innate max updated polarization
+        # initial reference value of 1000
+        min_por = 1000
         champion = (None, None, 0, None)  # assume the best action is champion
 
         a = len(set(max_touched))
@@ -398,14 +389,15 @@ class Game:
 
             # if the recent polarization is smaller than the minimum polarization in the history
             if por < min_por:
+                # store innate max updated polarization
                 min_por = por
+                # update the recent option as champion
                 champion = (v2, changed_opinion[:], payoff_row, min_por)
                 print("champion: ", champion[0], champion[1], champion[3])
-                # update the recent option as champion
             # else:
             #     print('Innate polarization is smaller than Min action')
 
-        return (champion)
+        return champion
 
     def _mixed_min_play(self, max_touched, fla_max_fre):
         '''
@@ -461,42 +453,29 @@ class Game:
         # Got optimal Min's opinion for v2
         # give a set of k weighted opinions
         k_opinion = self._k_derivate_s(v2, weight_M)
-
-        if any(x < 0 for x in k_opinion):
-            # min_opinion should be in the range (0,1)
-            print('Min_opinion less than 0')
-            print(k_opinion)
-            print('.')
-            print('.')
-            print('.')
-            print('.')
-        elif any(x > 1 for x in k_opinion):
-            print('Min_opinion more than 1')
-            print(k_opinion)
-            print('.')
-            print('.')
-            print('.')
-            print('.')
-
-        # TODO what's this part for?
-        arry = np.array([])
-        for i in k_opinion:
-            if i < 0:
-                print(i)
-                i = 0
-                print(i)
-                arry = np.append(arry, i)
-                print(arry)
-            elif i > 1:
-                i = 1
-                arry = np.append(arry, i)
-            else:
-                arry = np.append(arry, i)
+        updated_k_opinion = [0 if x < 0
+                             else 1 if x > 1
+                             else x
+                             for x in k_opinion]
 
         (mixed_por, payoff_row) = self._mixed_K_min_polarization(
-            v2, k_opinion, fla_max_fre)
+            v2, updated_k_opinion, fla_max_fre)
 
-        return (k_opinion, payoff_row, mixed_por)
+        return (updated_k_opinion, payoff_row, mixed_por)
+
+    ## PUBLIC METHODS ##
+
+    def setK(self, k):
+        self.k = k
+
+    def map_action(self, column):
+        k_opinions = self._create_all_comb()
+        len_kops = len(k_opinions)
+        nodeset_index = int(column / len_kops)
+        opset_index = column % len_kops
+        k_nodes = self._cgen(nodeset_index, self.n, self.k)
+        opinions = k_opinions[opset_index]
+        return (k_nodes, opinions)
 
     def run(self, game_rounds: int, memory: int):
         payoff_matrix = np.empty((0, self.h), float)
@@ -530,11 +509,6 @@ class Game:
         (v2, min_opinion, min_pol) = self._k_random_play_1(v1)
 
         first_min = (v2, min_opinion, min_pol)
-
-        # TODO maybe not needed since we have already checked in random play for v2
-        # if Max and Min randomly selected the same agent, then we need to restart - cannot choose same agent
-        if any(x in v1 for x in v2):
-            sys.exit()
 
         min_touched.extend(v2)
         min_touched_all.append(tuple(v2))
@@ -595,12 +569,20 @@ class Game:
                 print(f'Max Pol: {equi_max} Min Pol: {equi_min}')
                 break
 
+
             print("-" * 20)
             print(f"Game {i}")
             print("-" * 10)
 
             print(f'min_history {min_history}')
             print(f'max_history {max_history}')
+
+
+            if i == game_rounds - 100:
+                # Remove max frequency less than 0.1--
+                max_history_last_100 = np.zeros(self.h)
+                min_history_last_100 = []
+                min_touched_last_100 = []
 
             # MAXimizer play
             (v1, max_opinion, equi_max, column) = self._max_k_play(
@@ -639,14 +621,6 @@ class Game:
             # frequency of all min options in order
             fla_min_fre = np.array(list(counter.values()))/(i+1)
             print(f'fla_min_fre: {fla_min_fre}')
-
-            # after every 100 iteration, print previous historical result
-            if i % 100 == 0:
-                # TODO what is the code to print the results?
-                # Remove max frequency less than 0.1--
-                max_history_last_100 = np.zeros(self.h)
-                min_history_last_100 = []
-                min_touched_last_100 = []
 
             if equi_min == equi_max:
                 print(
