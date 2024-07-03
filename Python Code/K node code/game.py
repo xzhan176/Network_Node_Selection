@@ -1,14 +1,10 @@
+from utils import *
 from math import comb
 import sys
 import random
 import copy
 import collections
 import numpy as np
-
-# add parent directory to path so that utils is available
-sys.path.append('..')
-
-from utils import *
 
 
 class GameResult:
@@ -453,10 +449,10 @@ class Game:
         # Got optimal Min's opinion for v2
         # give a set of k weighted opinions
         k_opinion = self._k_derivate_s(v2, weight_M)
-        updated_k_opinion = [0 if x < 0
-                             else 1 if x > 1
-                             else x
-                             for x in k_opinion]
+        updated_k_opinion = np.array([0 if x < 0
+                                      else 1 if x > 1
+                                      else x
+                                      for x in k_opinion])
 
         (mixed_por, payoff_row) = self._mixed_K_min_polarization(
             v2, updated_k_opinion, fla_max_fre)
@@ -569,14 +565,12 @@ class Game:
                 print(f'Max Pol: {equi_max} Min Pol: {equi_min}')
                 break
 
-
             print("-" * 20)
             print(f"Game {i}")
             print("-" * 10)
 
             print(f'min_history {min_history}')
             print(f'max_history {max_history}')
-
 
             if i == game_rounds - 100:
                 # Remove max frequency less than 0.1--
