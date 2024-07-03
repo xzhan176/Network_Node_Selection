@@ -29,9 +29,7 @@ def random_play(s, n, A, L):
     ops = copy.copy(s)
     # randomly select an agent index
     v_index = random.randint(0, n-1)
-    # randomly select an opinion between 0 and 1
-    # TODO confirm which one is correct
-    # new_opinion = random.randint(0, 1)
+    # randomly select an opinion either 0 and 1
     new_opinion = random.uniform(0, 1)
     # print(f'new_op: {new_opinion}')
 
@@ -246,7 +244,7 @@ def max_mixed_opinion(payoff_matrix, n, v1, fla_min_fre):
         max_opinion = new_op
         por_arr[j] = mixed_max_polarization(
             payoff_matrix, v1, max_opinion, fla_min_fre)
-        j = j + 1   # index increase 1, put the polarization in array
+        j += 1   # index increase 1, put the polarization in array
 
     # the index of maximum polarization = max_opinion --[0,1]
     maximize_op = np.argmax(por_arr)

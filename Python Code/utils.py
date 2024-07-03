@@ -46,6 +46,18 @@ def get_node_edges(G, n):
     return edges
 
 
+
+# TODO
+# 1. Sample variance calculation for polarization
+def obj_polarization(A, L, op, n):
+    """
+    Maximizing polarization only: \\bar{z}^T \\bar{z}
+    """
+    op_mean = mean_center(op, n)
+    z_mean = np.dot(A, op_mean)
+    return np.dot(np.transpose(z_mean), z_mean)[0, 0]
+
+# 2. 2nd way of calculating polarization
 def obj_polarization(A, L, op, n):
     """
     Maximizing polarization only: \\bar{z}^T \\bar{z}

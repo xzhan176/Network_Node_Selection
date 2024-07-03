@@ -115,11 +115,9 @@ class Game:
 
             # maximizer play
 
-            # if Game_round = 200, after 100 iteration,
-            # Game 101 print previous historical result
-            # if i == game_rounds-100:
-            if i % 100 == 0:
-                # TODO should we remove these commented code?
+        
+            if i == game_rounds-100:
+        
                 # max_touched_100 = max_touched
                 # min_touched_100 = min_touched
                 # max_fre_100 = max_frequency  # store the max_frequency of first 100 iterations
