@@ -1,0 +1,5 @@
+**/__pycache__
+.ipynb_checkpoints
+results
+test.slurm
+.DS_Store
