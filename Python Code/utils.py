@@ -46,7 +46,6 @@ def get_node_edges(G, n):
     return edges
 
 
-# TODO confirm parameters interface, make sure it's the same for all functions
 def obj_polarization(A, op, n):
     """
     Maximizing polarization only: \\bar{z}^T \\bar{z}
