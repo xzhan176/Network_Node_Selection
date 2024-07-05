@@ -23,9 +23,9 @@ class GameResult:
 
 
 class Game:
-    def __init__(self, s, n, A, L, calculate_polarization):
+    def __init__(self, s, A, L, calculate_polarization):
         self.s = s
-        self.n = n
+        self.n = len(s)
         self.A = A
         self.L = L
         self.calculate_polarization = calculate_polarization
