@@ -46,19 +46,8 @@ def get_node_edges(G, n):
     return edges
 
 
-
-# TODO
-# 1. Sample variance calculation for polarization
-def obj_polarization(A, L, op, n):
-    """
-    Maximizing polarization only: \\bar{z}^T \\bar{z}
-    """
-    op_mean = mean_center(op, n)
-    z_mean = np.dot(A, op_mean)
-    return np.dot(np.transpose(z_mean), z_mean)[0, 0]
-
-# 2. 2nd way of calculating polarization
-def obj_polarization(A, L, op, n):
+# TODO confirm parameters interface, make sure it's the same for all functions
+def obj_polarization(A, op, n):
     """
     Maximizing polarization only: \\bar{z}^T \\bar{z}
     """
@@ -111,14 +100,14 @@ def plot_centrality_histogram(ax, df, title, bins, ylim):
     ax.tick_params(axis='y', labelsize=16)
 
 
-def calculate_polarization1(s, n, A, L):
+def calculate_polarization(s, n, A):
     y = mean_center(s, n)
     # Polarization before opinion dynamics
     innat_pol = np.dot(np.transpose(y), y)[0, 0]
     print(f'Innate_polarization:\t{innat_pol}')
 
     # Polarization after opinion dynamics
-    equ_pol = obj_polarization(A, L, s, n)
+    equ_pol = obj_polarization(A, s, n)
     print(f'Equi_polarization:\t{equ_pol}')
 
     di = equ_pol - innat_pol
@@ -127,6 +116,7 @@ def calculate_polarization1(s, n, A, L):
 
 def import_network(name):
     return importlib.import_module(f'networks.{name}')
+
 
 def network_anl(s, n, G, agent):
     print(f'{agent} opinion: {s[agent]}')
@@ -170,17 +160,17 @@ def network_anl(s, n, G, agent):
 
     gaps = get_gap(s, n)
     if gaps[agent] < 0:
-        my_gap = {index: value for index, value in enumerate(gaps) if value < 0}
+        my_gap = {index: value for index,
+                  value in enumerate(gaps) if value < 0}
         sorting_gap = sorted(my_gap.items(), key=lambda x: x[1])
         sorted_gap = dict(sorting_gap)
         res4 = rank(sorted_gap, agent)
     else:
-        my_gap = {index: value for index, value in enumerate(gaps) if value >= 0}
+        my_gap = {index: value for index,
+                  value in enumerate(gaps) if value >= 0}
         sorting_gap = sorted(my_gap.items(), key=lambda x: x[1], reverse=True)
         sorted_gap = dict(sorting_gap)
         res4 = rank(sorted_gap, agent)
 
     print(f"Agent's opinion extremity is ranked as:\t{res4}")
     print(f"Agent's min_pref is ranked as:\t{res4+res1}")
-
-
