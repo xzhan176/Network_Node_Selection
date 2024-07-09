@@ -64,6 +64,20 @@ def obj_innate_polarization(s, n):
     return np.dot(np.transpose(op_mean), op_mean)[0, 0]
 
 
+def len_actions(k, n):
+    """
+    Calculate the length of all possible actions for k opinions and n nodes
+    """
+    # create all combination of K opinions
+    max_option = [0, 1]
+    k_opinions = list(product(max_option, repeat=k))
+    # Horizontal length of all possible actions
+    all = list(range(n))
+    # all possible actions = all combination of k nodes * all combination of k opinions
+    h = len(list(combinations(all, k))) * len(k_opinions)
+    return h
+
+
 def calculate_centrality_and_convert_to_df(network, centrality_func):
     centrality = centrality_func(network)
     df = pd.DataFrame(list(centrality.values()))
@@ -85,7 +99,7 @@ def plot_centrality_histogram(ax, df, title, bins, ylim):
     ax.tick_params(axis='y', labelsize=16)
 
 
-def calculate_polarization1(s, n, A, L):
+def polarization_properties(s, n, A):
     y = mean_center(s, n)
     # Polarization before opinion dynamics
     innat_pol = np.dot(np.transpose(y), y)[0, 0]
