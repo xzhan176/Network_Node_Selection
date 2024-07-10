@@ -49,9 +49,6 @@ def main():
 
     temp_script = "run_batch.sh"
 
-    print(f'args.no_slurm {args.no_slurm}')
-    exit(0)
-
     # Run the game
     for i in range(1, k + 1):
         print(f'SELECTING {i} NODES')
