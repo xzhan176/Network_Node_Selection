@@ -45,6 +45,10 @@ class Game:
         self.L = L
         self.k = k
         self.h = self._len_actions(k, self.n)
+
+        # TODO check with Xilin
+        if k * 2 > self.n:
+            raise Exception('Invalid k value. Cannot have k*2 > n (size of network).')
         pass
 
     ## PRIVATE METHODS ##
@@ -163,7 +167,7 @@ class Game:
 
     def _change_k_innate_opinion(self, op, node_set, k_opinion):
         '''
-        node_set - 1 set  k_opinion- 1 set
+        node_set - 1 set k_opinion- 1 set
         '''
         op = copy.copy(op)
 
@@ -242,11 +246,9 @@ class Game:
         if any(i > 10 for i in payoff_vector) > 10:
             print('Error in Payoff Matrix')
             sys.exit
-        try:
-            # calculate fictitious payoff - equi_max
-            payoff_cal = payoff_vector * fla_min_fre  # payoff * frequency
-        except:
-            print('TODO handle Error')
+
+        # calculate fictitious payoff - equi_max
+        payoff_cal = payoff_vector * fla_min_fre  # payoff * frequency
         mixed_pol = np.sum(payoff_cal)  # add up
         return mixed_pol
 
@@ -282,6 +284,7 @@ class Game:
         # max_opi_option = random.uniform(0, 1)   # options that maximizer have
 
         # number of unique touched nodes
+        # TODO do we need to convert to a set? are all elements unique already?
         a = len(set(touched))
         # number of available combination of k nodes
         len_nodesets = comb(self.n-a, self.k)
@@ -604,23 +607,22 @@ class Game:
             min_touched_all.append(v2)
             min_touched_last_100.append(v2)
 
-            if tuple(tuple(v2) + min_opinion) in counter.keys():
-                # if (v2, tuple(min_opinion)) in counter.keys():
+            min_history_entry = (v2, tuple(min_opinion))
+            if min_history_entry in counter.keys():
                 # if this min_option is in min_history, no need to update payoff matrix, only update frequency
                 payoff_matrix = payoff_matrix
             else:
                 # if this is a new option, append to previous matrix
                 payoff_matrix = np.vstack([payoff_matrix, payoff_row])
 
-            # min_history.append((v2 + tuple(min_opinion)))
-            min_history.append((v2, tuple(min_opinion)))
-            min_history_last_100.append((v2, min_opinion))
+            min_history.append(min_history_entry)
+            min_history_last_100.append(min_history_entry)
 
-            # a dictionary include {'min_option': count of this choice}
+            # a dictionary of {(v2, min_option): count of this choice}
             counter = collections.Counter(min_history)
             # frequency of all min options in order
             fla_min_fre = np.array(list(counter.values()))/(i+1)
-            print(f'fla_min_fre: {fla_min_fre}')
+            print(f'fla_min_fre {fla_min_fre.shape}: {fla_min_fre}')
 
             if equi_min == equi_max:
                 print(
