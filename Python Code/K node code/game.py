@@ -661,7 +661,7 @@ def exportGameResult(network: str, game: Game, result: GameResult, k, memory, ex
     os.makedirs('results', exist_ok=True)
 
     pd.DataFrame(result.payoff_matrix).to_csv(
-        f'results/network-{network}-k-{k}-experiment-{experiment}-payoff_matrix.csv')
+        f'results/network-{network}-k-{k}-experiment-{experiment}-memory-{memory}-payoff_matrix.csv')
 
     # Save the original standard output
     original_stdout = sys.stdout
