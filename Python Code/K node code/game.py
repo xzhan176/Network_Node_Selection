@@ -656,17 +656,17 @@ class Game:
         )
 
 
-def exportGameResult(game: Game, result: GameResult, k, memory, experiment):
+def exportGameResult(network: str, game: Game, result: GameResult, k, memory, experiment):
     # Create the 'results' directory if it doesn't exist
     os.makedirs('results', exist_ok=True)
 
     pd.DataFrame(result.payoff_matrix).to_csv(
-        f'results/Payoff-Matrix-k-{k}-experiment-{experiment}.csv')
+        f'results/network-{network}-k-{k}-experiment-{experiment}-payoff_matrix.csv')
 
     # Save the original standard output
     original_stdout = sys.stdout
 
-    with open(f'results/Result-k-{k}-experiment-{experiment}.txt', "w") as f:
+    with open(f'results/network-{network}-k-{k}-experiment-{experiment}-results.txt', "w") as f:
         # Change the standard output to the file we created.
         sys.stdout = f
 

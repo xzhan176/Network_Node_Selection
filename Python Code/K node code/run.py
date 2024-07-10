@@ -46,7 +46,7 @@ def main():
 
     # Save the result
     experiment = args.experiment
-    exportGameResult(game, result, k, memory, experiment)
+    exportGameResult(args.network, game, result, k, memory, experiment)
 
 
 if __name__ == "__main__":
