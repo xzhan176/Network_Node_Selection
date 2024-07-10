@@ -7,8 +7,8 @@ def generateScriptContent(network, k, experiment, game_rounds, memory):
     job_name = f"opinion-polarization-{network}-k-{k}-experiment-{experiment}-memory-{memory}"
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
-#SBATCH --output={job_name}-output.txt
-#SBATCH --error={job_name}-error.log
+#SBATCH --output=results/{job_name}-output.txt
+#SBATCH --error=results/{job_name}-error.log
 #SBATCH --ntasks=1
 
 python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
