@@ -44,19 +44,13 @@ def main():
     if args.rounds is not None:
         game_rounds = args.rounds
 
-    print(
-        f"Running experiment for network \"{args.network}\" with game_rounds={game_rounds} k={k} and memory={memory}...")
-
     temp_script = "run_batch.sh"
 
-    # Run the game
-    for i in range(1, k + 1):
-        print(f'SELECTING {i} NODES')
-        print('_' * 20)
-
+    # Run the games
+    for _ in range(1, k + 1):
         for experiment in range(1, 11):
+            print('-' * 20)
             print(f'Experiment {experiment} k={k}')
-            print('_' * 20)
 
             if args.no_slurm:
                 os.system(
