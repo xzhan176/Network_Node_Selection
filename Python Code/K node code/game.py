@@ -1,3 +1,4 @@
+from itertools import product
 from utils import *
 from math import comb
 import sys
@@ -646,3 +647,84 @@ class Game:
             equi_max=equi_max,
             equi_min=equi_min,
         )
+
+
+def exportGameResult(game: Game, result: GameResult, k, memory, experiment):
+    pd.DataFrame(result.payoff_matrix).to_csv(
+        f'results/Payoff-Matrix-k-{k}-experiment-{experiment}.csv')
+
+    # Save the original standard output
+    original_stdout = sys.stdout
+
+    with open(f'results/Result-k-{k}-experiment-{experiment}.txt', "w") as f:
+        # Change the standard output to the file we created.
+        sys.stdout = f
+
+        print('Initial Condition -(agent, opinion, pol)')
+        # print(f'Innate op {s}')
+        # print(f'Adjacency matrix {G}')
+        # print('Selected Nodeset, k_Opinions, Steady-state polarization')
+        print(f'Max:\t{result.first_max}')
+        print(f'Min:\t{result.first_min}')
+
+        print('_____________________')
+        print(f'Max Pol:\t{result.equi_max}')
+        print(f'Min Pol:\t{result.equi_min}')
+
+        # MAXimizer's distribution of LAST 100 iteration
+        print('Max_distribution_last_100')
+        max_l100_fre = result.max_history_last_100/100
+        print(max_l100_fre[np.nonzero(max_l100_fre)])
+        # print for small network
+        # print(max_history_last_100)
+        # # Print for Large Network
+        print(np.nonzero(max_l100_fre))
+
+        columns = np.nonzero(max_l100_fre)
+        columns = list(columns[0])
+        for column in columns:
+            (k_nodes, opinions) = game.map_action(column)
+            print(f'Max Nodes: {k_nodes}\tOpinion: {opinions}')
+
+        print('Max_distribution_all')
+        max_fre = result.max_history/result.game_rounds
+        print(max_fre[np.nonzero(max_fre)])
+        print([np.nonzero(max_fre)])
+
+        # TODO confirm isn't this block the same as the one above
+        columns_all = np.nonzero(max_l100_fre)
+        columns_all = list(columns_all[0])
+        for column in columns_all:
+            (k_nodes, opinions) = game.map_action(column)
+            print(f'Max Nodes: {k_nodes}\tOpinion: {opinions}')
+
+        # MINimizer's Strategy in the last 100 round
+        counter = collections.Counter(result.min_touched_last_100)
+        # frequency of all min options in order
+        fla_min_fre = np.array(list(counter.values()))/(100)
+        print('Min_distribution_last_100')
+        print(fla_min_fre)
+        print(counter)
+        # print(min_touched_last_100)
+
+        # a dictionary include {'min_option': count of this choice}
+        counter_1 = collections.Counter(result.min_touched_all)
+        # frequency of all min options in order
+        fla_min_fre_1 = np.array(
+            list(counter_1.values()))/result.game_rounds
+        print('Min_distribution_all')
+        print(fla_min_fre_1)
+        print(counter_1)
+        np.set_printoptions(precision=3)
+
+        # a dictionary include {'min_option': count of this choice}
+        counter_a = collections.Counter(result.min_history)
+        print(counter_a)
+
+        print(f'min_recent_{memory}_touched')
+        print(result.min_touched)
+        print(f'max_recent_{memory}_touched')
+        print(result.max_touched)
+
+        # Reset the standard output to its original value
+        sys.stdout = original_stdout
