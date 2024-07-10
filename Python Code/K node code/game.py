@@ -1,4 +1,5 @@
 from itertools import product
+import os
 from utils import *
 from math import comb
 import sys
@@ -241,8 +242,11 @@ class Game:
         if any(i > 10 for i in payoff_vector) > 10:
             print('Error in Payoff Matrix')
             sys.exit
-        # calculate fictitious payoff - equi_max
-        payoff_cal = payoff_vector * fla_min_fre  # payoff * frequency
+        try:
+            # calculate fictitious payoff - equi_max
+            payoff_cal = payoff_vector * fla_min_fre  # payoff * frequency
+        except:
+            print('TODO handle Error')
         mixed_pol = np.sum(payoff_cal)  # add up
         return mixed_pol
 
@@ -338,14 +342,15 @@ class Game:
         # length of available k_nodes combinations
         len_avsets = comb(self.n - a, self.k)
 
-        for i_th in range(len_avsets):  # for each available k nodes
+        for i_th in range(len_avsets): # for each available k nodes
             v1 = self._create_available_comb(i_th, min_touched)
             # map this node set to its index located in all lists
             k_nodes_index = self._find_idx(v1)
 
-            for f in range(len_kops):         # for each opinion combination
+            for f in range(len_kops): # for each opinion combination
                 # locate the column in payoff row- all combinations
                 column = k_nodes_index*len_kops + f
+                print(f'DEBUG column={column} k_node_index={k_nodes_index} len_kops={len_kops} f={f}')
                 # calculate mixed polarization
                 por = self._k_max_polarization(
                     payoff_matrix, column, fla_min_fre)
@@ -650,6 +655,9 @@ class Game:
 
 
 def exportGameResult(game: Game, result: GameResult, k, memory, experiment):
+    # Create the 'results' directory if it doesn't exist
+    os.makedirs('results', exist_ok=True)
+
     pd.DataFrame(result.payoff_matrix).to_csv(
         f'results/Payoff-Matrix-k-{k}-experiment-{experiment}.csv')
 
