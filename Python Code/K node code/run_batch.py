@@ -4,7 +4,7 @@ from utils import *
 
 
 def generateScriptContent(network, k, experiment, game_rounds, memory):
-    job_name = f"opinion-polarization-{network}-k-{k}-experiment-{experiment}-memory-{memory}"
+    job_name = f"network-{network}-k-{k}-experiment-{experiment}-memory-{memory}"
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --output=results/{job_name}-output.txt
@@ -18,7 +18,7 @@ python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
 
 def main():
     # Get command line arguments
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Submit a batch of experiments with number of nodes range from 1 to k")
     parser.add_argument("network",
                         help="The network to run the experiment on")
     parser.add_argument("k",
