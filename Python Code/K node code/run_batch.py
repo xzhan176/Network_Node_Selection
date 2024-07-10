@@ -34,8 +34,7 @@ def main():
                         default=10)
     parser.add_argument("--no-slurm",
                         help="Don't use SLURM to run the experiments",
-                        action="store_true",
-                        default=True)
+                        action="store_true")
     args = parser.parse_args()
 
     # Configure the game
@@ -49,6 +48,9 @@ def main():
         f"Running experiment for network \"{args.network}\" with game_rounds={game_rounds} k={k} and memory={memory}...")
 
     temp_script = "run_batch.sh"
+
+    print(f'args.no_slurm {args.no_slurm}')
+    exit(0)
 
     # Run the game
     for i in range(1, k + 1):
