@@ -3,6 +3,20 @@ import os
 from utils import *
 
 
+def generateScriptContent(network, k, experiment, game_rounds, memory):
+    job_name = f"opinion-polarization-{network}-{k}-{experiment}-{memory}"
+    script = f"""
+#!/bin/bash
+#SBATCH --job-name={job_name}
+#SBATCH --output={job_name}-output.txt
+#SBATCH --error={job_name}-error.log
+#SBATCH --ntasks=1
+
+python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
+"""
+    return script
+
+
 def main():
     # Get command line arguments
     parser = argparse.ArgumentParser()
@@ -18,6 +32,10 @@ def main():
                         help="The memory of the game. Default is 10",
                         type=int,
                         default=10)
+    parser.add_argument("--no-slurm",
+                        help="Don't use SLURM to run the experiments",
+                        action="store_true",
+                        default=True)
     args = parser.parse_args()
 
     # Configure the game
@@ -30,6 +48,9 @@ def main():
     print(
         f"Running experiment for network \"{args.network}\" with game_rounds={game_rounds} k={k} and memory={memory}...")
 
+    temp_script = "run_batch.sh"
+
+    # Run the game
     for i in range(1, k + 1):
         print(f'SELECTING {i} NODES')
         print('_' * 20)
@@ -38,9 +59,20 @@ def main():
             print(f'Experiment {experiment} k={k}')
             print('_' * 20)
 
-            # Run the game
-            os.system(
-                f"python run.py {args.network} {k} {experiment} -r {game_rounds} -m {memory}")
+            if args.no_slurm:
+                os.system(
+                    f"python run.py {args.network} {k} {experiment} -r {game_rounds} -m {memory}")
+            else:
+                f = open(temp_script, "w")
+                f.write(generateScriptContent(args.network,
+                        k, experiment, game_rounds, memory))
+                f.close()
+                os.system(f"sbatch {temp_script}")
+    try:
+        os.remove(temp_script)
+    except FileNotFoundError:
+        # file wasn't created if the script wasn't run in SLURM mode
+        pass
 
 
 if __name__ == "__main__":
