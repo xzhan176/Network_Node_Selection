@@ -19,7 +19,8 @@ python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
 
 def main():
     # Get command line arguments
-    parser = argparse.ArgumentParser(description="Submit a batch of experiments with number of nodes range from 1 to k")
+    parser = argparse.ArgumentParser(
+        description="Submit a batch of experiments with number of nodes range from 1 to k")
     parser.add_argument("network",
                         help="The network to run the experiment on")
     parser.add_argument("k",
@@ -39,15 +40,16 @@ def main():
 
     # Configure the game
     memory = args.memory
-    k = args.k
-    game_rounds = k * 200
+    maxK = args.k
     if args.rounds is not None:
         game_rounds = args.rounds
 
     temp_script = "run_batch.sh"
 
     # Run the games
-    for _ in range(1, k + 1):
+    for k in range(1, maxK + 1):
+        game_rounds = k * 200
+
         for experiment in range(1, 11):
             print('-' * 20)
             print(f'Experiment {experiment} k={k}')
