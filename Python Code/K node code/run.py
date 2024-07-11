@@ -1,10 +1,34 @@
 import argparse
+import time
 import scipy
 from game import Game, exportGameResult
 from utils import *
 
+def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | None = None):
+    # Import network
+    network_module = import_network(network)
+    G, s, n = network_module.init()
+    L = scipy.sparse.csgraph.laplacian(G, normed=False)
+    A = np.linalg.inv(np.identity(n) + L)
+
+    if game_rounds is None:
+        game_rounds = k * 200
+
+    print('-' * 40)
+    print(
+        f"Running experiment for network \"{network}\" with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
+
+    # Run the game
+    game = Game(s, A, L, k)
+    result = game.run(game_rounds, memory)
+
+    # Save the result
+    exportGameResult(network, game, result, k, memory, experiment)
+
 
 def main():
+    start_time = time.time()
+
     # Get command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("network",
@@ -24,29 +48,12 @@ def main():
                         default=10)
     args = parser.parse_args()
 
-    # Import network
-    network_module = import_network(args.network)
-    G, s, n = network_module.init()
-    L = scipy.sparse.csgraph.laplacian(G, normed=False)
-    A = np.linalg.inv(np.identity(n) + L)
+    run(args.network, args.k, args.experiment, args.memory, args.rounds)
 
-    # Configure the game
-    memory = args.memory
-    k = args.k
-    game_rounds = k * 200
-    if args.rounds is not None:
-        game_rounds = args.rounds
-
-    print(
-        f"Running experiment for network \"{args.network}\" with game_rounds={game_rounds} k={k} and memory={memory}\n.\n.\n.")
-
-    # Run the game
-    game = Game(s, A, L, k)
-    result = game.run(game_rounds, memory)
-
-    # Save the result
-    experiment = args.experiment
-    exportGameResult(args.network, game, result, k, memory, experiment)
+    # Calculate elapsed time
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time:.4f} seconds")
 
 
 if __name__ == "__main__":

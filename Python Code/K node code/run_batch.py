@@ -51,8 +51,8 @@ def main():
         game_rounds = k * 200
 
         for experiment in range(1, 11):
-            print('-' * 20)
-            print(f'Experiment {experiment} k={k}')
+            print('-' * 20, flush=True)
+            print(f'Experiment {experiment} k={k}', flush=True)
 
             if args.no_slurm:
                 os.system(
