@@ -22,7 +22,6 @@ conda env create --file environment.yml
 conda activate opinion_polarization
 ```
 
-
 ## Python Code
 
 This code has been written in Python. All necessary packages have been included in the code. This directory contains the following documented Python files.
@@ -45,5 +44,3 @@ SavePayoffMatrix = true <br>
 SaveGameConvergenceInfo = true <br>
 
 If any problem occurs while running the code, please contact us at xzhan176@binghamton.edu.
-
-

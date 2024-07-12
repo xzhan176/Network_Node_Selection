@@ -1,4 +1,4 @@
-from itertools import product
+from itertools import product, islice
 import os
 from utils import *
 from math import comb
@@ -14,7 +14,7 @@ class GameResult:
     Result of K Node Game
     """
 
-    def __init__(self, game_rounds, first_max, first_min, min_touched, max_touched,  payoff_matrix, min_touched_last_100, min_touched_all, fla_min_fre, fla_max_fre, min_history, max_history, min_history_last_100, max_history_last_100, equi_max, equi_min):
+    def __init__(self, game_rounds: int, first_max, first_min, min_touched, max_touched,  payoff_matrix, min_touched_last_100, min_touched_all, fla_min_fre, fla_max_fre, min_history, max_history, min_history_last_100, max_history_last_100, equi_max, equi_min):
         self.game_rounds = game_rounds
         self.first_max = first_max
         self.first_min = first_min
@@ -46,7 +46,6 @@ class Game:
         self.k = k
         self.h = self._len_actions(k, self.n)
 
-        # TODO check with Xilin
         if k * 2 > self.n:
             raise Exception('Invalid k value. Cannot have k*2 > n (size of network).')
         pass
@@ -66,9 +65,10 @@ class Game:
         h = comb(n, k) * len_kops
         return h
 
+    # TODO optimize (if possible, not high priority)
     def _cgen(self, i, n, k):
         """
-        Returns the i-th combination of k numbers chosen from 1,2,...,n
+        Creates all combinations of nodes in the network then returns the i-th combination
         """
         c = []
         r = i+0
@@ -145,12 +145,13 @@ class Game:
                     k_nodes[j] += 1
         return k_nodes
 
-    def _create_all_permutations(self):
+    def _max_opinion_set_generator(self):
         '''
-        Create all permutations of k opinions
+        Return a generator for all permutations of k opinions
         '''
         max_option = [0, 1]
-        return list(product(max_option, repeat=self.k))
+        size = len(max_option) ** self.k
+        return product(max_option, repeat=self.k), size
 
     def _create_available_combinations(self, i_th, touched):
         '''
@@ -208,11 +209,11 @@ class Game:
 
         column = 0
         i = 0
+        k_opinions, _ = self._max_opinion_set_generator()
 
         # i - which set of nodes option
         for i in range(0, comb(self.n, self.k)):
             nodes = self._cgen(i, self.n, self.k)
-            k_opinions = self._create_all_permutations()
 
             # tuple index - select one combination of opinions
             for ops in k_opinions:
@@ -253,18 +254,16 @@ class Game:
         '''
         Player randomly choose an agent and randomly change the agent
         '''
-        k_opinions = self._create_all_permutations()
+        k_opinions, len_kops = self._max_opinion_set_generator()
         len_nodesets = comb(self.n, self.k)
         # randomly select an agent index
         i_th = random.randint(0, len_nodesets-1)
         v_list = self._cgen(i_th, self.n, self.k)
 
-        # create all combination of K opinions
-        len_kops = len(k_opinions)  # - number of combinations exist
         # randomly select index for an OPINION list
         op_index = random.randint(0, len_kops-1)
         # randomly select an opinion list(0 and 1) to update the opinion array
-        new_op = k_opinions[op_index]
+        new_op = next(islice(k_opinions, op_index, None))
         print('Nodes, opinions')
         print(v_list, new_op)
         op = self._change_k_innate_opinion(self.s, v_list, new_op)
@@ -329,8 +328,7 @@ class Game:
 
     def _max_k_play(self, payoff_matrix, fla_min_fre, min_touched):
         # # pass on the innate opinion that has been changed by minimizer
-        k_opinions = self._create_all_permutations()
-        len_kops = len(k_opinions)
+        _, len_kops = self._max_opinion_set_generator()
 
         # start producing changes
         all_por = np.zeros(self.h)
@@ -342,6 +340,7 @@ class Game:
         # length of available k_nodes combinations
         len_avsets = comb(self.n - a, self.k)
 
+        # TODO make this loop concurrent
         for i_th in range(len_avsets): # for each available k nodes
             v1 = self._create_available_combinations(i_th, min_touched)
             # map this node set to its index located in all lists
@@ -382,6 +381,7 @@ class Game:
         a = len(set(max_touched))
         len_nodesets = comb(self.n - a, self.k)
 
+        # TODO optimize min_por
         for i_th in range(len_nodesets):
             v2 = self._create_available_combinations(i_th, max_touched)
             # find the best new_op option
@@ -425,22 +425,22 @@ class Game:
     def _min_k_mixed_opinion(self, v2, fla_max_fre):
         weight_M = 0
         # loop for each max_action(in total 2*n)
-        k_opinions = self._create_all_permutations()
-        len_kops = len(k_opinions)
 
         for column in range(self.h):
+            k_opinions, len_kops = self._max_opinion_set_generator()
+
             if fla_max_fre[column] != 0:
-                if column > self.k:
+                opset_index = column % len_kops
+
+                if column > len_kops:
                     nodeset_index = int(column/len_kops)
-                    opset_index = column % len_kops
                 else:
                     # print('less than 1')
                     nodeset_index = 0
-                    opset_index = column
 
                 # Calculating Max's action at this column
                 v1 = self._cgen(nodeset_index, self.n, self.k)
-                max_opinion = k_opinions[opset_index]
+                max_opinion = next(islice(k_opinions, opset_index, None))
 
                 # change innate opinion by max action
                 op1 = self._change_k_innate_opinion(self.s, v1, max_opinion)
@@ -470,12 +470,11 @@ class Game:
         self.k = k
 
     def map_action(self, column):
-        k_opinions = self._create_all_permutations()
-        len_kops = len(k_opinions)
+        k_opinions, len_kops = self._max_opinion_set_generator()
         nodeset_index = int(column / len_kops)
         opset_index = column % len_kops
         k_nodes = self._cgen(nodeset_index, self.n, self.k)
-        opinions = k_opinions[opset_index]
+        opinions = next(islice(k_opinions, opset_index, None))
         return (k_nodes, opinions)
 
     def run(self, game_rounds: int, memory: int):
@@ -495,9 +494,6 @@ class Game:
 
         # Save the first action to report later
         first_max = (v1, max_opinion, max_pol)
-
-        # save Maximizer's action history
-        max_touched.extend(tuple(v1))
 
         # store maximizer play history, using agent(row) and changed opinion(column) as indicator to locate history
         max_history[column] += 1
@@ -536,11 +532,11 @@ class Game:
 
         i = 1
         while True:
-            # has finished all game rounds
+            # Has finished all game rounds
             if i > game_rounds:
                 print('MAX_last_100,  all')
                 max_l100_fre = max_history_last_100/100
-                max_fre = max_history/game_rounds
+                max_fre = max_history / (game_rounds + 1)
                 print(max_l100_fre[np.nonzero(max_l100_fre)],
                       max_fre[np.nonzero(max_fre)])
                 print(np.nonzero(max_l100_fre)[0],
@@ -548,12 +544,11 @@ class Game:
 
                 columns = list(np.nonzero(max_l100_fre)[0])
                 for column in list(columns):
-                    k_opinions = self._create_all_permutations()
-                    len_kops = len(k_opinions)
+                    k_opinions, len_kops = self._max_opinion_set_generator()
                     nodeset_index = int(column/len_kops)
                     opset_index = column % len_kops
                     k_nodes = self._cgen(nodeset_index, self.n, self.k)
-                    opinions = k_opinions[opset_index]
+                    opinions = next(islice(k_opinions, opset_index, None))
                     print(f'Max Nodes: {k_nodes} | Opinion: {opinions}')
 
                 # MINimizer's Strategy in the last 100 round
@@ -564,7 +559,7 @@ class Game:
                 # a dictionary {'min_option': count of this choice}
                 counter_1 = collections.Counter(min_touched_all)
                 # frequency of all min options in order
-                fla_min_fre_1 = np.array(list(counter_1.values()))/game_rounds
+                fla_min_fre_1 = np.array(list(counter_1.values()))/(game_rounds + 1)
                 print(fla_min_fre, fla_min_fre_1)
                 print(counter, counter_1)
                 print(f'Max Pol: {equi_max} Min Pol: {equi_min}')
@@ -577,7 +572,8 @@ class Game:
             print(f'min_history {min_history}')
             print(f'max_history {max_history}')
 
-            if i == game_rounds - 100:
+            # Reset the history to collect the last 100 rounds
+            if i == game_rounds - 99:
                 # Remove max frequency less than 0.1--
                 max_history_last_100 = np.zeros(self.h)
                 min_history_last_100 = []
@@ -693,7 +689,7 @@ def exportGameResult(network: str, game: Game, result: GameResult, k, memory, ex
             print(f'Max Nodes: {k_nodes}\tOpinion: {opinions}')
 
         print('Max_distribution_all')
-        max_fre = result.max_history/result.game_rounds
+        max_fre = result.max_history / (result.game_rounds + 1)
         print(max_fre[np.nonzero(max_fre)])
         print([np.nonzero(max_fre)])
 
@@ -710,7 +706,7 @@ def exportGameResult(network: str, game: Game, result: GameResult, k, memory, ex
         counter_1 = collections.Counter(result.min_touched_all)
         # frequency of all min options in order
         fla_min_fre_1 = np.array(
-            list(counter_1.values()))/result.game_rounds
+            list(counter_1.values())) / (result.game_rounds + 1)
         print('Min_distribution_all')
         print(fla_min_fre_1)
         print(counter_1)
