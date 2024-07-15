@@ -1,8 +1,8 @@
 import argparse
-import time
 import scipy
 from game import Game, exportGameResult
 from utils import *
+
 
 def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | None = None):
     # Import network
@@ -16,7 +16,7 @@ def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | N
 
     print('-' * 40)
     print(
-        f"Running experiment for network \"{network}\" with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
+        f"Running experiment for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
 
     # Run the game
     game = Game(s, A, L, k)
@@ -27,8 +27,6 @@ def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | N
 
 
 def main():
-    start_time = time.time()
-
     # Get command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("network",
@@ -48,12 +46,8 @@ def main():
                         default=10)
     args = parser.parse_args()
 
-    run(args.network, args.k, args.experiment, args.memory, args.rounds)
-
-    # Calculate elapsed time
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Elapsed time: {elapsed_time:.4f} seconds")
+    fn_benchmark(lambda: run(
+        args.network, args.k, args.experiment, args.memory, args.rounds))
 
 
 if __name__ == "__main__":

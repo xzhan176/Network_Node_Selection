@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 import importlib
@@ -44,8 +45,7 @@ def get_node_edges(G, n):
 
     return edges
 
-
-def obj_polarization(A, op, n):
+def obj_polarization(A, op, n) -> float:
     """
     Maximizing polarization only: \\bar{z}^T \\bar{z}
     """
@@ -58,7 +58,6 @@ def obj_innate_polarization(s, n):
     """
     Calculate innate polarization
     """
-    # np.set_printoptions(precision=5)
     op_mean = mean_center(s, n)
     return np.dot(np.transpose(op_mean), op_mean)[0, 0]
 
@@ -158,3 +157,12 @@ def network_anl(s, n, G, agent):
 
     print(f"Agent's opinion extremity is ranked as:\t{res4}")
     print(f"Agent's min_pref is ranked as:\t{res4+res1}")
+
+def fn_benchmark(fn, label='', display=True):
+    start = time.perf_counter()
+    results = fn()
+    end = time.perf_counter()
+    elapsed = end - start
+    if display:
+        print(f"{label} Elapsed time: {elapsed:.5f} seconds")
+    return results
