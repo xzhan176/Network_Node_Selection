@@ -17,13 +17,10 @@ def init():
     G = nx.karate_club_graph()
     n = len(G)
 
-    print(f'There are {n} agents')
-
     ############################ Make Adjacency Matrix #####################################
     ZKC_graph = nx.karate_club_graph()
     G = nx.convert_matrix.to_numpy_array(ZKC_graph)
     G[G != 0] = 1
-    print(G)
 
     # Import Innate opinion
     script_dir = os.path.dirname(os.path.abspath(__file__))
