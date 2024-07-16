@@ -5,7 +5,7 @@ from utils import *
 
 
 def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | None = None):
-    # Import network
+    # Prepare network
     network_module = import_network(network)
     G, s, n = network_module.init()
     L = scipy.sparse.csgraph.laplacian(G, normed=False)
