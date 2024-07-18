@@ -1,5 +1,5 @@
 from utils import *
-from math import comb, isclose
+from math import comb
 from itertools import combinations, product, islice
 from joblib import Parallel, delayed, dump, load
 import os
@@ -620,7 +620,9 @@ class Game:
             fla_min_fre = np.array(list(min_history_counter.values()))/(i+1)
             # print(f'fla_min_fre {fla_min_fre.shape}: {fla_min_fre}')
 
-            if isclose(equi_min, equi_max, rel_tol=10**-PRECISION):
+            equi_max = round(equi_max, PRECISION)
+            equi_min = round(equi_min, PRECISION)
+            if equi_max == equi_min:
                 print(
                     f"Reached Nash Equilibrium at round {i} and Equi_Por = {equi_min}")
                 # print(f'max_distribution {max_frequency}')
