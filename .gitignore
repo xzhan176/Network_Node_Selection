@@ -4,3 +4,4 @@ results
 test.slurm
 .DS_Store
 Python Code/K node code/run_batch.sh
+**/*memmaps

@@ -16,7 +16,7 @@ def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | N
 
     print('-' * 40)
     print(
-        f"Running experiment for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
+        f"Running experiment {experiment} for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
 
     # Run the game
     game = Game(s, A, L, k)
