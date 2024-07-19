@@ -395,7 +395,7 @@ class Game:
         cpus = os.cpu_count()
 
         print(
-            f'Iterating through {available_k_nodes_count} available k nodes')
+            f'Minimizer: finding the champion of {available_k_nodes_count} available k nodes')
 
         available_k_nodes = combinations(available_nodes, self.k)
         champion_candidates = Parallel(n_jobs=cpus)(
