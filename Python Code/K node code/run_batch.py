@@ -5,7 +5,7 @@ from game import Game
 from utils import *
 
 
-def generateScriptContent(network, k, experiment, game_rounds, memory):
+def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count = 1):
     job_name = f"{network[:2]}k{k}e{experiment}"
     result_name = f"network-{network}-k-{k}-experiment-{experiment}-memory-{memory}"
     script = f"""#!/bin/bash
@@ -13,6 +13,7 @@ def generateScriptContent(network, k, experiment, game_rounds, memory):
 #SBATCH --output=results/{result_name}-output.txt
 #SBATCH --error=results/{result_name}-error.log
 #SBATCH --ntasks=1
+#SBATCH --cpus-per-task={cpu_count}
 
 python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
 """
@@ -39,6 +40,10 @@ def main():
                         help="The memory of the game. Default is 10",
                         type=int,
                         default=10)
+    parser.add_argument("-c", "--cpus-per-task",
+                        help="The number of CPUs to use for each task. Default is 1",
+                        type=int,
+                        default=1)
     parser.add_argument("--no-slurm",
                         help="Don't use SLURM to run the experiments. Use this argument to run the script on a local machine.",
                         action="store_true")
@@ -74,7 +79,7 @@ def main():
             else:
                 f = open(temp_script, "w")
                 f.write(generateScriptContent(args.network,
-                        k, experiment, game_rounds, memory))
+                        k, experiment, game_rounds, memory, cpu_count=args.cpus_per_task))
                 f.close()
                 os.system(f"sbatch {temp_script}")
     try:
