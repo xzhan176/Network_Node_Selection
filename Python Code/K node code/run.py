@@ -1,25 +1,37 @@
 import argparse
 import scipy
+from os import cpu_count
 from game import Game, exportGameResult
 from utils import *
 
 
-def run(network: str, k: int, experiment: int, memory: int, game_rounds: int | None = None):
+def run(network: str, k: int, experiment: int, memory: int,
+        game_rounds: int | None = None,
+        disk_dumped: bool = False):
     # Prepare network
-    network_module = import_network(network)
-    G, s, n = network_module.init()
-    L = scipy.sparse.csgraph.laplacian(G, normed=False)
-    A = np.linalg.inv(np.identity(n) + L)
+    if not disk_dumped:
+        network_module = import_network(network)
+        G, s, n = network_module.init()
+        L = scipy.sparse.csgraph.laplacian(G, normed=False)
+        A = np.linalg.inv(np.identity(n) + L)
+    else:
+        s = None
+        A = None
 
     if game_rounds is None:
         game_rounds = k * 200
 
     print('-' * 40)
     print(
-        f"Running experiment {experiment} for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}\n.\n.\n.")
+        f"Running experiment {experiment} for network \"{network}\" (n = {n}) with game_rounds={game_rounds} k={k} memory={memory}.")
+    print(f'Number of cores available: {cpu_count()}.')
+    print('\n.\n.\n.')
 
     # Run the game
-    game = Game(s, A, L, k)
+    game = Game(k, s, A,
+                disk_dumped=disk_dumped,
+                s_memmap_name=f"s_memmap_{network}",
+                A_memmap_name=f"A_memmap_{network}")
     result = game.run(game_rounds, memory)
 
     # Save the result
@@ -44,10 +56,13 @@ def main():
                         help="The memory of the game. Default is 10",
                         type=int,
                         default=10)
+    parser.add_argument("-dd", "--disk-dumped",
+                        help="Use disk dumped data",
+                        action="store_true")
     args = parser.parse_args()
 
     fn_benchmark(lambda: run(
-        args.network, args.k, args.experiment, args.memory, args.rounds))
+        args.network, args.k, args.experiment, args.memory, args.rounds, args.disk_dumped))
 
 
 if __name__ == "__main__":

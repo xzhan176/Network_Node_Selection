@@ -1,5 +1,7 @@
 import argparse
 import os
+import scipy
+from game import Game
 from utils import *
 
 
@@ -24,17 +26,21 @@ def main():
     parser.add_argument("network",
                         help="The network to run the experiment on")
     parser.add_argument("k",
-                        help="The number of nodes to select",
+                        help="The number of nodes to select. The script will run experiments for each k=1,2,3,...,k.",
                         type=int)
     parser.add_argument("-r", "--rounds",
                         help="The number of rounds to run the game for. Default is k * 200",
                         type=int)
+    parser.add_argument("-e", "--experiments",
+                        help="The number of experiments to run for each k. Default is 10",
+                        type=int,
+                        default=10)
     parser.add_argument("-m", "--memory",
                         help="The memory of the game. Default is 10",
                         type=int,
                         default=10)
     parser.add_argument("--no-slurm",
-                        help="Don't use SLURM to run the experiments",
+                        help="Don't use SLURM to run the experiments. Use this argument to run the script on a local machine.",
                         action="store_true")
     args = parser.parse_args()
 
@@ -44,13 +50,21 @@ def main():
     if args.rounds is not None:
         game_rounds = args.rounds
 
+    # Preload network data to disk
+    network_module = import_network(args.network)
+    G, s, n = network_module.init()
+    L = scipy.sparse.csgraph.laplacian(G, normed=False)
+    A = np.linalg.inv(np.identity(n) + L)
+    Game.loadDataToDisk(s, f"s_memmaps_{args.network}")
+    Game.loadDataToDisk(A, f"A_memmaps_{args.network}")
+
     temp_script = "run_batch.sh"
 
     # Run the games
     for k in range(1, maxK + 1):
         game_rounds = k * 200
 
-        for experiment in range(1, 11):
+        for experiment in range(1, args.experiments + 1):
             print('-' * 20, flush=True)
             print(f'Experiment {experiment} k={k}', flush=True)
 

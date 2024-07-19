@@ -42,29 +42,58 @@ class Game:
     K Node Game
     """
 
-    def __init__(self, s, A, L, k: int, memmap_folder: str = './memmaps'):
-        self.n = len(s[:])
-        if k * 2 > self.n:
-            raise Exception(
-                'Invalid k value. Cannot have k*2 > n (size of network).')
+    @staticmethod
+    def loadDataToDisk(data, filename: str, folder: str = 'memmaps'):
+        """
+        Use this static method to load s and A to disk for improved performance
+        """
+        try:
+            folderPath = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                folder)
+            os.mkdir(folderPath)
+        except FileExistsError:
+            pass
 
+        data_memmap = os.path.join(folderPath, filename)
+        dump(data, data_memmap)
+
+    def __init__(self, k: int, s=None, A=None,
+                 memmap_folder: str = 'memmaps',
+                 s_memmap_name: str = 's_memmap',
+                 A_memmap_name: str = 'A_memmap',
+                 disk_dumped: bool = False):
         self._memmap_folder = memmap_folder
         try:
             os.mkdir(self._memmap_folder)
         except FileExistsError:
             pass
 
-        # load A to disk
-        A_memmap = os.path.join(self._memmap_folder, 'A_memmap')
-        dump(A, A_memmap)
-        self.A = load(A_memmap, mmap_mode='r')
-
-        # load s to disk
-        s_memmap = os.path.join(self._memmap_folder, 's_memmap')
-        dump(s, s_memmap)
+        # Init s, use data from disk if available
+        s_memmap = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            self._memmap_folder,
+            s_memmap_name)
+        if not disk_dumped:
+            dump(s, s_memmap)
         self.s = load(s_memmap, mmap_mode='r')
 
-        self.L = L
+        self.n = len(s[:])
+
+        # Make sure k is a valid value
+        if k * 2 > self.n:
+            raise Exception(
+                'Invalid k value. Cannot have k*2 > n (size of network).')
+
+        # Init A, use data from disk if available
+        A_memmap = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            self._memmap_folder,
+            A_memmap_name)
+        if not disk_dumped:
+            dump(A, A_memmap)
+        self.A = load(A_memmap, mmap_mode='r')
+
         self.k = k
         self.h = len_actions(k, self.n)
 
@@ -109,7 +138,6 @@ class Game:
         l.extend(k_node)
         l = list(set(l))
         return l
-
 
     def _next_available_combination(self, i_th: int, touched: list):
         '''
