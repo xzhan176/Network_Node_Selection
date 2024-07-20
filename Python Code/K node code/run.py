@@ -1,4 +1,5 @@
 import argparse
+import os
 import scipy
 from os import cpu_count
 from game import Game, exportGameResult
@@ -30,8 +31,7 @@ def run(network: str, k: int, experiment: int, memory: int,
     # Run the game
     game = Game(k, s, A,
                 disk_dumped=disk_dumped,
-                s_memmap_name=f"s_memmap_{network}",
-                A_memmap_name=f"A_memmap_{network}")
+                temp_path=os.path.join(os.path.dirname(__file__), f"memmaps_{network}_{k}_{experiment}"))
     result = game.run(game_rounds, memory)
 
     # Save the result
