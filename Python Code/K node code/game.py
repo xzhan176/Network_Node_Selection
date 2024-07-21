@@ -59,24 +59,23 @@ class Game:
         dump(data, data_memmap)
 
     def __init__(self, k: int, s=None, A=None,
-                 memmap_folder: str = 'memmaps',
-                 s_memmap_name: str = 's_memmap',
-                 A_memmap_name: str = 'A_memmap',
+                 temp_path: str | None = None,
+                 s_memmap_file: str | None = None,
+                 A_memmap_file: str | None = None,
                  disk_dumped: bool = False):
-        self._memmap_folder = memmap_folder
-        try:
-            os.mkdir(self._memmap_folder)
-        except FileExistsError:
-            pass
+
+        self._temp_path = temp_path or os.path.join(
+            os.path.dirname(__file__),
+            "temp")
+        os.makedirs(self._temp_path, exist_ok=True)
 
         # Init s, use data from disk if available
-        s_memmap = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            self._memmap_folder,
-            s_memmap_name)
+        s_memmap_file = s_memmap_file or os.path.join(
+            self._temp_path,
+            "s_memmap")
         if not disk_dumped:
-            dump(s, s_memmap)
-        self.s = load(s_memmap, mmap_mode='r')
+            dump(s, s_memmap_file)
+        self.s = load(s_memmap_file, mmap_mode='r')
 
         self.n = len(s[:])
 
@@ -86,13 +85,12 @@ class Game:
                 'Invalid k value. Cannot have k*2 > n (size of network).')
 
         # Init A, use data from disk if available
-        A_memmap = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            self._memmap_folder,
-            A_memmap_name)
+        A_memmap_file = A_memmap_file or os.path.join(
+            self._temp_path,
+            "A_memmap")
         if not disk_dumped:
-            dump(A, A_memmap)
-        self.A = load(A_memmap, mmap_mode='r')
+            dump(A, A_memmap_file)
+        self.A = load(A_memmap_file, mmap_mode='r')
 
         self.k = k
         self.h = len_actions(k, self.n)
@@ -181,6 +179,8 @@ class Game:
     def _make_k_payoff_row(self, op, v2):
         """
         - op: opinions that was changed by minimizer
+
+        Return the payoff row for the minimizer with shape (h, ) filled with floats
         """
         payoffs = np.full(self.h, 10000.0)
         column = 0
@@ -302,7 +302,7 @@ class Game:
         # )
 
         # fla_max_fre recorded the frequency of each maximizer's action, frequency sum = 1
-        # payoff (2*n array) * maximizer_action_frequency
+        # payoff (h array) * maximizer_action_frequency
         payoff_cal = payoff_row * fla_max_fre
 
         # add up all, calculate average/expected payoff
@@ -397,14 +397,32 @@ class Game:
         print(
             f'Minimizer: finding the champion of {available_k_nodes_count} available k nodes')
 
-        available_k_nodes = combinations(available_nodes, self.k)
-        champion_candidates = Parallel(n_jobs=cpus)(
-            delayed(self._min_k_mixed_opinion)(v2, fla_max_fre)
-            for v2 in available_k_nodes)
-        # get champion by comparing the polarization
-        champion = min(champion_candidates, key=lambda x: x[3])
+        champion_dtype = np.dtype([
+            ('v2', np.int32, (self.k)),
+            ('min_opinion', np.float64, (self.k)),
+            ('payoff_row', np.float64, (self.h)),
+            ('min_pol', np.float16),
+        ])
+        champion_file = os.path.join(self._temp_path, 'champion')
+        champion = np.memmap(champion_file, dtype=champion_dtype, mode='w+', shape=(1, ))
+        champion[0]['min_pol'] = 1000
 
-        # print(f'v2 champion {champion}')
+        def find_champion(champion, v2, fla_max_fre):
+            candidate = self._min_k_mixed_opinion(v2, fla_max_fre)
+            if candidate[3] < champion[0]['min_pol']:
+                champion[0] = candidate
+
+        available_k_nodes = combinations(available_nodes, self.k)
+        # champion_candidates = Parallel(n_jobs=cpus)(
+            # delayed(self._min_k_mixed_opinion)(v2, fla_max_fre)
+            # for v2 in available_k_nodes)
+        Parallel(n_jobs=cpus)(
+            delayed(find_champion)(champion, v2, fla_max_fre)
+            for v2 in available_k_nodes)
+
+        champion = tuple(champion[0][0]), tuple(champion[0][1]), champion[0][2], champion[0][3]
+
+        print(f'v2 champion {champion}')
         return champion
 
     def _mixed_choose_min_vertex(self, max_touched: list, fla_max_fre):
@@ -455,7 +473,8 @@ class Game:
             max_touched, fla_max_fre)
 
         # if minimizer cannot find a action to minimize polarization after maximizer's action
-        if v2 == None:
+        # if v2 == None:
+        if min_pol == 1000:
             print('Minimizer fail')
         else:
             print(f"Minimizer found its target agents: {v2} {min_opinion}")
