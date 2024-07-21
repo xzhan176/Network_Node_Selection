@@ -7,7 +7,7 @@ from utils import *
 
 def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count = 1):
     job_name = f"{network[:2]}k{k}e{experiment}"
-    result_name = f"network-{network}-k-{k}-experiment-{experiment}-memory-{memory}"
+    result_name = f"{network}-k-{k}-e-{experiment}-m-{memory}"
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --output=results/{result_name}-output.txt
