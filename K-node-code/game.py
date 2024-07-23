@@ -398,8 +398,8 @@ class Game:
             f'Minimizer: finding the champion of {available_k_nodes_count} available k nodes')
 
         champion_dtype = np.dtype([
-            ('v2', np.int32, (self.k)),
-            ('min_opinion', np.float64, (self.k)),
+            ('v2', np.int32, (self.k,)),
+            ('min_opinion', np.float64, (self.k,)),
             ('payoff_row', np.float64, (self.h)),
             ('min_pol', np.float16),
         ])
