@@ -12,6 +12,7 @@ def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count
 #SBATCH --job-name={job_name}
 #SBATCH --output=results/{result_name}-output.txt
 #SBATCH --error=results/{result_name}-error.log
+#SBATCH --time=122:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={cpu_count}
 
