@@ -31,7 +31,10 @@ def run(network: str, k: int, experiment: int, memory: int,
     # Run the game
     game = Game(k, s, A,
                 disk_dumped=disk_dumped,
-                temp_path=os.path.join(os.path.dirname(__file__), f"memmaps_{network}_{k}_{experiment}"))
+                temp_path=os.path.join(
+                    os.path.dirname(__file__),
+                    "memmaps",
+                    f"memmaps_{network}_{k}_{experiment}"))
     result = game.run(game_rounds, memory)
 
     # Save the result

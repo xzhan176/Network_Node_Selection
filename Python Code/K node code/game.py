@@ -403,8 +403,9 @@ class Game:
             ('payoff_row', np.float64, (self.h)),
             ('min_pol', np.float16),
         ])
-        champion_file = os.path.join(self._temp_path, 'champion')
-        champion = np.memmap(champion_file, dtype=champion_dtype, mode='w+', shape=(1, ))
+        champion_file = os.path.join(self._temp_path, 'min_champion')
+        champion = np.memmap(
+            champion_file, dtype=champion_dtype, mode='w+', shape=(1, ))
         champion[0]['min_pol'] = 1000
 
         def find_champion(champion, v2, fla_max_fre):
@@ -414,13 +415,14 @@ class Game:
 
         available_k_nodes = combinations(available_nodes, self.k)
         # champion_candidates = Parallel(n_jobs=cpus)(
-            # delayed(self._min_k_mixed_opinion)(v2, fla_max_fre)
-            # for v2 in available_k_nodes)
+        # delayed(self._min_k_mixed_opinion)(v2, fla_max_fre)
+        # for v2 in available_k_nodes)
         Parallel(n_jobs=cpus)(
             delayed(find_champion)(champion, v2, fla_max_fre)
             for v2 in available_k_nodes)
 
-        champion = tuple(champion[0][0]), tuple(champion[0][1]), champion[0][2], champion[0][3]
+        champion = tuple(champion[0][0]), tuple(
+            champion[0][1]), champion[0][2], champion[0][3]
 
         print(f'v2 champion {champion}')
         return champion
