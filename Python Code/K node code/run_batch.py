@@ -5,7 +5,7 @@ from game import Game
 from utils import *
 
 
-def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count = 1):
+def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count=1):
     job_name = f"{network[:2]}k{k}e{experiment}"
     result_name = f"{network}-k-{k}-e-{experiment}-m-{memory}"
     script = f"""#!/bin/bash
@@ -52,8 +52,6 @@ def main():
     # Configure the game
     memory = args.memory
     maxK = args.k
-    if args.rounds is not None:
-        game_rounds = args.rounds
 
     # Preload network data to disk
     network_module = import_network(args.network)
@@ -67,7 +65,7 @@ def main():
 
     # Run the games
     for k in range(1, maxK + 1):
-        game_rounds = k * 200
+        game_rounds = k * 200 if args.rounds is None else args.rounds
 
         for experiment in range(1, args.experiments + 1):
             print('-' * 20, flush=True)
