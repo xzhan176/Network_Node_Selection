@@ -125,7 +125,6 @@ class Game:
         result = np.linalg.solve(a, b)
         return result
 
-    # [x] fixed
     def _push(self, l: list, k_node: list | tuple, memory: int):
         lSize = len(l)
         if lSize >= memory:
@@ -182,7 +181,8 @@ class Game:
 
         Return the payoff row for the minimizer with shape (h, ) filled with floats
         """
-        payoffs = np.full(self.h, 10000.0)
+        # make default values infinite then we will override them later. Infinite values will make the minimizer avoid choosing these actions.
+        payoffs = np.full(self.h, np.inf)
         column = 0
 
         # print(f'_make_k_payoff_row: iterate through {comb(self.n, self.k) * 2**self.k} columns') # TODO remove
@@ -195,6 +195,7 @@ class Game:
                     k_opinions_size + k_opinion_index
                 # opinions that was changed by both min and max
                 op_min_max = change_k_innate_opinion(op, k_node, k_opinion)
+                # TODO for zero sum, when v1 == v2, pass self.s instead of op_min
                 payoff_polarization = obj_polarization(
                     self.A, op_min_max, self.n)
                 # payoff_polarization = fn_benchmark(
@@ -308,9 +309,8 @@ class Game:
         # add up all, calculate average/expected payoff
         mixed_pol = np.sum(payoff_cal)
 
-        # Replace the the column_index of agent v2 with -100 for max
-        # TODO why is this needed
-        payoff_row = [-10000 if payoff == 10000
+        # make default values infinite then we will override them later. Infinite values will make the minimizer avoid choosing these actions.
+        payoff_row = [-np.inf if payoff == np.inf
                       else payoff
                       for payoff in payoff_row]
 
@@ -351,6 +351,8 @@ class Game:
     def _max_k_play_multi(self, payoff_matrix, fla_min_fre, min_touched: list):
         # all_por = np.zeros(self.h)
         _, max_k_opinion_size = max_k_opinion_generator(self.k)
+        # TODO for zero sum, do not exclude min_touched
+        # TODO any function that reference k will need to be updated to the size of min_touched
         k_node_count = comb(self.n - len(min_touched), self.k)
         option_count = k_node_count * max_k_opinion_size
 
@@ -390,6 +392,8 @@ class Game:
         '''
         Go through each opinion option of each agent to find the best minimizer's action
         '''
+        # TODO for zero sum, do not exclude max_touched
+        # TODO any function that reference k will need to be updated to the size of max_touched
         available_nodes = [x for x in range(self.n) if x not in max_touched]
         available_k_nodes_count = comb(len(available_nodes), self.k)
         cpus = os.cpu_count()
