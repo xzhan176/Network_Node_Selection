@@ -173,16 +173,14 @@ class Game:
         M_rest = np.transpose(M_new_temp-Out_term)
         return M_rest
 
-    # [x] improved a bit
-    # TODO optimize _make_k_payoff_row
     def _make_k_payoff_row(self, op, v2):
         """
         - op: opinions that was changed by minimizer
 
         Return the payoff row for the minimizer with shape (h, ) filled with floats
         """
-        # make default values infinite then we will override them later. Infinite values will make the minimizer avoid choosing these actions.
-        payoffs = np.full(self.h, np.inf)
+        # make default values high, arbitrarily chose 10_000.0, then we will override them later. This value will make the minimizer avoid choosing these actions.
+        payoffs = np.full(self.h, 10_000.0)
         column = 0
 
         # print(f'_make_k_payoff_row: iterate through {comb(self.n, self.k) * 2**self.k} columns') # TODO remove
@@ -309,8 +307,8 @@ class Game:
         # add up all, calculate average/expected payoff
         mixed_pol = np.sum(payoff_cal)
 
-        # make default values infinite then we will override them later. Infinite values will make the minimizer avoid choosing these actions.
-        payoff_row = [-np.inf if payoff == np.inf
+        # make default values large, 10000, then we will override them later. Infinite values will make the minimizer avoid choosing these actions.
+        payoff_row = [-10_000.0 if payoff == 10_000.0
                       else payoff
                       for payoff in payoff_row]
 
@@ -408,8 +406,11 @@ class Game:
             ('min_pol', np.float16),
         ])
         champion_file = os.path.join(self._temp_path, 'min_champion')
-        champion = np.memmap(
-            champion_file, dtype=champion_dtype, mode='w+', shape=(1, ))
+        champion = np.memmap(champion_file,
+                             dtype=champion_dtype,
+                             mode='w+',
+                             shape=(1, ),
+                             )
         champion[0]['min_pol'] = 1000
 
         def find_champion(champion, v2, fla_max_fre):
@@ -418,15 +419,15 @@ class Game:
                 champion[0] = candidate
 
         available_k_nodes = combinations(available_nodes, self.k)
-        # champion_candidates = Parallel(n_jobs=cpus)(
-        # delayed(self._min_k_mixed_opinion)(v2, fla_max_fre)
-        # for v2 in available_k_nodes)
         Parallel(n_jobs=cpus)(
             delayed(find_champion)(champion, v2, fla_max_fre)
             for v2 in available_k_nodes)
 
-        champion = tuple(champion[0][0]), tuple(
-            champion[0][1]), champion[0][2], champion[0][3]
+        # (v2, opinion, payoff_row, min_pol)
+        champion = (tuple(champion[0][0]),
+                    tuple(champion[0][1]),
+                    champion[0][2],
+                    champion[0][3])
 
         print(f'v2 champion {champion}')
         return champion
@@ -838,7 +839,6 @@ def max_k_opinion_generator(k, calculate_size=True):
     return product(max_option, repeat=k), size
 
 
-# [x] improved
 def change_k_innate_opinion(op, k_node: list | tuple, k_opinion: list | tuple):
     '''
     Return a new copy of op that has the opinions of k_nodes changed to k_opinion
