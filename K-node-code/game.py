@@ -129,8 +129,7 @@ class Game:
         lSize = len(l)
         if lSize >= memory:
             diff = lSize - memory
-            for _ in range(diff):
-                l.pop(0)
+            l = l[diff:]
 
         l.extend(k_node)
         l = list(set(l))
