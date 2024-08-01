@@ -55,10 +55,6 @@ def main():
     parser.add_argument("experiment",
                         help="The experiment number to run",
                         type=int)
-    parser.add_argument("-z", "--zero-sum",
-                        help="Whether the game is zero-sum",
-                        type=bool,
-                        default=False)
     parser.add_argument("-r", "--rounds",
                         help="The number of rounds to run the game for. Default is k * 200",
                         type=int)
@@ -69,6 +65,10 @@ def main():
     parser.add_argument("-dd", "--disk-dumped",
                         help="Use disk dumped data",
                         action="store_true")
+    parser.add_argument("-z", "--zero-sum",
+                        help="Whether the game is zero-sum",
+                        type=bool,
+                        default=False)
     args = parser.parse_args()
 
     fn_benchmark(lambda: run(
