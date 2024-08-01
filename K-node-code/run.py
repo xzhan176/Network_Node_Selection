@@ -67,7 +67,7 @@ def main():
                         action="store_true")
     parser.add_argument("-z", "--zero-sum",
                         help="Whether the game is zero-sum",
-                        type=bool,
+                        action="store_true",
                         default=False)
     args = parser.parse_args()
 
