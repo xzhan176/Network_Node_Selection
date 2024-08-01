@@ -62,7 +62,8 @@ class Game:
                  temp_path: str | None = None,
                  s_memmap_file: str | None = None,
                  A_memmap_file: str | None = None,
-                 disk_dumped: bool = False):
+                 disk_dumped: bool = False,
+                 zero_sum: bool = False):
 
         self._temp_path = temp_path or os.path.join(
             os.path.dirname(__file__),
@@ -94,6 +95,9 @@ class Game:
 
         self.k = k
         self.h = len_actions(k, self.n)
+        self.zero_sum = zero_sum
+        self.max_touched = []
+        self.min_touched = []
 
     ## PRIVATE METHODS ##
 
@@ -183,25 +187,48 @@ class Game:
         column = 0
 
         # iterate through all possible k nodes combinations excluding v2 nodes
-        for k_node in combinations([x for x in range(self.n) if x not in v2], self.k):
+        # for k_node in combinations([x for x in range(self.n) if x not in v2], self.k):
+        for k_node in combinations((x for x in range(self.n)), self.k):
             k_opinions, k_opinions_size = max_k_opinion_generator(self.k)
+            unique_nodes = tuple(set(k_node) - set(v2))
+            unique_nodes_indices = [k_node.index(x) for x in unique_nodes]
+
             for k_opinion_index, k_opinion in enumerate(k_opinions):
                 column = find_index(self.n, k_node) * \
                     k_opinions_size + k_opinion_index
+
                 # opinions that was changed by both min and max
-                op_min_max = change_k_innate_opinion(op, k_node, k_opinion)
-                # TODO for zero sum, when v1 == v2, pass self.s instead of op_min
+                if self.zero_sum:
+                    unique_nodes_opinion = [k_opinion[i]
+                                            for i in unique_nodes_indices]
+                    op_min_max = change_k_innate_opinion(
+                        op, unique_nodes, unique_nodes_opinion)
+                else:
+                    op_min_max = change_k_innate_opinion(
+                        op, k_node, k_opinion)
+
                 payoff_polarization = obj_polarization(
                     self.A, op_min_max, self.n)
-                # payoff_polarization = fn_benchmark(
-                #     lambda: obj_polarization(self.A, op_min_max, self.n),
-                #     label=f"_make_k_payoff_row: Calculate polarization for column {column}/{self.h}",
-                # )
                 payoffs[column] = payoff_polarization
 
         return payoffs
 
     def _k_max_polarization(self, payoff_matrix, column, fla_min_fre):
+        '''
+        Op has been updated by minimizer, fla_min_fre includes min's history, so maximizer react to the innate op after that
+        '''
+        # create payoff matrix for maximizer
+        payoff_vector = payoff_matrix[:, column]
+        if any(i > 10 for i in payoff_vector) > 10:
+            print('Error in Payoff Matrix')
+            sys.exit
+
+        # calculate fictitious payoff - equi_max
+        payoff_cal = payoff_vector * fla_min_fre
+        mixed_pol = np.sum(payoff_cal)
+        return mixed_pol
+
+    def _k_max_polarization_multi(self, payoff_matrix, column, fla_min_fre):
         '''
         Op has been updated by minimizer, fla_min_fre includes min's history, so maximizer react to the innate op after that
         '''
@@ -288,11 +315,6 @@ class Game:
         # calculate the polarization with both min(did above) and max's action(in make_payoff_row)
         # the vector list out 2*n payoffs after min's action combine with 2*n possible max's actions
         payoff_row = self._make_k_payoff_row(op_min, v2)
-        # payoff_row = fn_benchmark( # TODO remove benchmark
-        #     lambda: self._make_k_payoff_row(op_min, v2),
-        #     label=f"_make_k_payoff_row: Minimizer find best action for {v2}",
-        #     display=DISPLAY_BENCHMARK,
-        # )
 
         # fla_max_fre recorded the frequency of each maximizer's action, frequency sum = 1
         # payoff (h array) * maximizer_action_frequency
@@ -308,29 +330,30 @@ class Game:
 
         return (mixed_pol, payoff_row)
 
-    # [x] improved
-    def _max_k_play(self, payoff_matrix, fla_min_fre, min_touched: list):
+    # TODO optimize this loop
+    def _max_k_play(self, payoff_matrix, fla_min_fre):
         _, max_k_opinion_size = max_k_opinion_generator(self.k)
         all_por = np.zeros(self.h)
 
-        # TODO optimize this loop
-        for v1 in combinations([x for x in range(self.n) if x not in min_touched], self.k):
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+        else:
+            nodes = (x for x in range(self.n) if x not in self.min_touched)
+        v1_gen = combinations(nodes, self.k)
+        for v1 in v1_gen:
             v1_index = find_index(self.n, v1)
 
-            for f in range(max_k_opinion_size):  # for each opinion combination
+            for i in range(max_k_opinion_size):  # for each opinion combination
                 # locate the column in payoff row - all combinations
-                column = v1_index * max_k_opinion_size + f
+                column = v1_index * max_k_opinion_size + i
                 mixed_polarization = self._k_max_polarization(
                     payoff_matrix, column, fla_min_fre)
                 all_por[column] = mixed_polarization
 
-        #     print('Max_por', max(all_por))
-
-        # print('all_por', all_por)
         # Index of maximum polarization - in all actions
         column = np.argmax(all_por)
-        print(f'Max play best action column: {column}')
-        max_pol = round(all_por[column], PRECISION)
+        max_pol = all_por[column]
+        # print(f'Max play best action column: {column}')
 
         v1, v1_opinion = self.map_action(column)
 
@@ -340,22 +363,26 @@ class Game:
         return v1, v1_opinion, max_pol, column
 
     # with multiprocessing
-    def _max_k_play_multi(self, payoff_matrix, fla_min_fre, min_touched: list):
-        # all_por = np.zeros(self.h)
+    def _max_k_play_multi(self, payoff_matrix, fla_min_fre):
         _, max_k_opinion_size = max_k_opinion_generator(self.k)
-        # TODO for zero sum, do not exclude min_touched
-        # TODO any function that reference k will need to be updated to the size of min_touched
-        k_node_count = comb(self.n - len(min_touched), self.k)
+        if self.zero_sum:
+            nodes_count = self.n
+        else:
+            nodes_count = self.n - len(self.min_touched)
+        k_node_count = comb(nodes_count, self.k)
         option_count = k_node_count * max_k_opinion_size
 
         print(f'Maximizer: iterating through {option_count} options +\
-            ({k_node_count} * {max_k_opinion_size})')
+              ({k_node_count} * {max_k_opinion_size})')
 
         cpus = os.cpu_count()
 
         batch_size = int(1e5)
-        data = np.array(
-            list(combinations([x for x in range(self.n) if x not in min_touched], self.k)))
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+        else:
+            nodes = (x for x in range(self.n) if x not in self.min_touched)
+        data = np.array(list(combinations(nodes, self.k)))
         batch_count = max(int(option_count / batch_size), 1)
         jobs = min(batch_count, cpus)
         print(f'Maximizer: batch count {batch_count} - jobs: {jobs}')
@@ -370,8 +397,6 @@ class Game:
         column, max_por = champion
         print(f'Maximizer: champion {champion} (column, max_por)')
 
-        # print('all_por', all_por)
-
         # get k node corresponding to the column
         v1, max_opinion = self.map_action(column)
 
@@ -380,18 +405,61 @@ class Game:
 
         return v1, max_opinion, max_por, column
 
-    def _mixed_choose_min_vertex_multi(self, max_touched: list, fla_max_fre):
+    # with multiprocessing
+    def _max_k_play_multi2(self, payoff_matrix, fla_min_fre):
+        _, max_k_opinion_size = max_k_opinion_generator(self.k)
+        all_por = np.zeros(self.h)
+
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+        else:
+            nodes = (x for x in range(self.n) if x not in self.min_touched)
+        v1_gen = combinations(nodes, self.k)
+
+        def calculate_polarization(v1, payoff_matrix, fla_min_fre):
+            v1_index = find_index(self.n, v1)
+
+            for i in range(max_k_opinion_size):  # for each opinion combination
+                # locate the column in payoff row - all combinations
+                column = v1_index * max_k_opinion_size + i
+                mixed_polarization = self._k_max_polarization(
+                    payoff_matrix, column, fla_min_fre)
+                all_por[column] = mixed_polarization
+
+        cpu_count = os.cpu_count()
+        Parallel(n_jobs=cpu_count)(
+            delayed(calculate_polarization)
+            (v1, payoff_matrix, fla_min_fre)
+            for v1 in v1_gen)
+
+        # Index of maximum polarization - in all actions
+        column = np.argmax(all_por)
+        max_pol = all_por[column]
+        # print(f'Max play best action column: {column}')
+
+        v1, v1_opinion = self.map_action(column)
+
+        print(
+            f"Maximizer found its target {self.k} agents: {v1} op: {v1_opinion}")
+
+        return v1, v1_opinion, max_pol, column
+
+    def _mixed_choose_min_vertex_multi(self, fla_max_fre):
         '''
         Go through each opinion option of each agent to find the best minimizer's action
         '''
-        # TODO for zero sum, do not exclude max_touched
-        # TODO any function that reference k will need to be updated to the size of max_touched
-        available_nodes = [x for x in range(self.n) if x not in max_touched]
-        available_k_nodes_count = comb(len(available_nodes), self.k)
-        cpus = os.cpu_count()
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+            nodes_count = self.n
+        else:
+            nodes = (x for x in range(self.n) if x not in self.max_touched)
+            nodes_count = self.n - len(self.max_touched)
+
+        k_nodes_count = comb(nodes_count, self.k)
+        k_nodes = combinations(nodes, self.k)
 
         print(
-            f'Minimizer: finding the champion of {available_k_nodes_count} available k nodes')
+            f'Minimizer: finding the champion among {k_nodes_count} k nodes')
 
         champion_dtype = np.dtype([
             ('v2', np.int32, (self.k,)),
@@ -403,21 +471,21 @@ class Game:
         champion = np.memmap(champion_file,
                              dtype=champion_dtype,
                              mode='w+',
-                             shape=(1, ),
-                             )
+                             shape=(1, ))
         champion[0]['min_pol'] = 1000
+
+        cpus = os.cpu_count()
 
         def find_champion(champion, v2, fla_max_fre):
             candidate = self._min_k_mixed_opinion(v2, fla_max_fre)
             if candidate[3] < champion[0]['min_pol']:
                 champion[0] = candidate
 
-        available_k_nodes = combinations(available_nodes, self.k)
         Parallel(n_jobs=cpus)(
             delayed(find_champion)(champion, v2, fla_max_fre)
-            for v2 in available_k_nodes)
+            for v2 in k_nodes)
 
-        # (v2, opinion, payoff_row, min_pol)
+        # champion: (v2, opinion, payoff_row, min_pol)
         champion = (tuple(champion[0][0]),
                     tuple(champion[0][1]),
                     champion[0][2],
@@ -426,7 +494,7 @@ class Game:
         print(f'v2 champion {champion}')
         return champion
 
-    def _mixed_choose_min_vertex(self, max_touched: list, fla_max_fre):
+    def _mixed_choose_min_vertex(self, fla_max_fre):
         '''
         Go through each opinion option of each agent to find the best minimizer's action
         '''
@@ -436,20 +504,20 @@ class Game:
         # best action
         champion = (None, None, 0, None)
 
-        available_k_nodes = [x for x in range(self.n) if x not in max_touched]
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+            nodes_count = self.n
+        else:
+            nodes = (x for x in range(self.n) if x not in self.max_touched)
+            nodes_count = self.n - len(self.max_touched)
 
         print(
-            f'Iterating through {comb(len(available_k_nodes), self.k)} available k nodes')
+            f'Iterating through {comb(nodes_count, self.k)} k nodes')
 
         # TODO optimize min_por
-        for v2 in combinations(available_k_nodes, self.k):
+        for v2 in combinations(nodes, self.k):
             _, changed_opinion, payoff_row, por = self._min_k_mixed_opinion(
                 v2, fla_max_fre)
-            # changed_opinion, payoff_row, por = fn_benchmark( # TODO remove benchmark
-            #     lambda: self._min_k_mixed_opinion(v2, fla_max_fre),
-            #     label=f"_min_k_mixed_opinion: Minimizer find best action for {v2}",
-            #     display=DISPLAY_BENCHMARK,
-            # )
 
             # if the recent polarization is smaller than the minimum polarization in the history
             if por < min_por:
@@ -464,13 +532,13 @@ class Game:
 
         return champion
 
-    def _mixed_min_play(self, max_touched: list, fla_max_fre):
+    def _mixed_min_play(self, fla_max_fre):
         '''
         Opinions has been updated by maximizer, fla_max_fre includes max's history, so minimizer react to the innate op after that
         '''
         # v2, min_opinion, payoff_row, min_pol = self._mixed_choose_min_vertex(
         v2, min_opinion, payoff_row, min_pol = self._mixed_choose_min_vertex_multi(
-            max_touched, fla_max_fre)
+            fla_max_fre)
 
         # if minimizer cannot find a action to minimize polarization after maximizer's action
         # if v2 == None:
@@ -487,16 +555,15 @@ class Game:
         """
         weight_M = 0
 
-        # for column in range(self.h):
         for column, frequency in enumerate(fla_max_fre):
-            # TODO ask Xilin why is this condition necessary
             if frequency != 0:
                 v1, v1_opinion = self.map_action(column)
 
                 # change innate opinion by max action
+                # TODO ask Xilin whether to use only non-overlapping nodes?
                 op_max = change_k_innate_opinion(self.s, v1, v1_opinion)
 
-                # Derivate optimal Min's opinion for nodeset v2
+                # Derivate optimal Min's opinion for v2 nodes
                 # {sum}{j}(s_j(h_j -c))  - rest of terms
                 M_rest = self._sum_rest(op_max, v2)
                 weight_M += frequency * M_rest  # {sum}{v} p_v * M
@@ -506,13 +573,8 @@ class Game:
         derivative_k_opinion = self._k_derivate_s(v2, weight_M)
         derivative_k_opinion = np.clip(derivative_k_opinion, 0, 1)
 
-        (mixed_por, payoff_row) = self._mixed_k_min_polarization(
+        mixed_por, payoff_row = self._mixed_k_min_polarization(
             v2, derivative_k_opinion, fla_max_fre)
-        # (mixed_por, payoff_row) = fn_benchmark( # TODO remove benchmark
-        #     lambda: self._mixed_k_min_polarization(v2, derivative_k_opinion, fla_max_fre),
-        #     label=f"_mixed_k_min_polarization: Calculate polarization of minimizer's Mixed Strategy",
-        #     display=DISPLAY_BENCHMARK,
-        # )
 
         return (v2, derivative_k_opinion, payoff_row, mixed_por)
 
@@ -534,8 +596,6 @@ class Game:
 
     def run(self, game_rounds: int, memory: int):
         payoff_matrix = np.empty((0, self.h), float)
-        max_touched = []
-        min_touched = []
         min_touched_all = []
         min_touched_last_100 = []
         max_history = np.zeros(self.h, int)
@@ -544,8 +604,10 @@ class Game:
         max_history_last_100 = np.zeros(self.h, int)
         min_history_last_100 = []
         max_history_column = []
+        self.max_touched = []
+        self.min_touched = []
 
-        # Game start from maximizer random play
+        # Initial maximizer random play
         (v1, max_opinion, max_pol, column) = self._k_random_play()
 
         max_history_column.append(column)
@@ -559,13 +621,12 @@ class Game:
         # maximizer play's frequency, only played 1 time so far, divided by 1
         fla_max_fre = max_history / 1
 
-        # if game start from minimizer random play - make sure two random play are not same agent!!!
-        # print('Minimizer first selection')
+        # Initial minimizer random play
         (v2, min_opinion, min_pol) = self._k_random_play_1(v1)
 
         first_min = (v2, min_opinion, min_pol)
 
-        min_touched.extend(v2)
+        self.min_touched.extend(v2)
         min_touched_all.append(tuple(v2))
 
         # store minimizer play history
@@ -602,13 +663,14 @@ class Game:
 
             # MAXimizer play
             (v1, max_opinion, equi_max, column) = fn_benchmark(
-                # lambda: self._max_k_play(
-                lambda: self._max_k_play_multi(
-                    payoff_matrix, fla_min_fre, min_touched),
+                lambda: self._max_k_play(
+                # lambda: self._max_k_play_multi(
+                # lambda: self._max_k_play_multi2(
+                    payoff_matrix, fla_min_fre),
                 label="Maximizer play",
                 display=DISPLAY_BENCHMARK,
             )
-            max_touched = self._push(max_touched, v1, memory)
+            self.max_touched = self._push(self.max_touched, v1, memory)
 
             # accumulate strategy
             max_history[column] += 1
@@ -624,12 +686,12 @@ class Game:
             # (v2, payoff_row, min_opinion, equi_min) = self._mixed_min_play(
             #     max_touched, fla_max_fre)
             (v2, min_opinion, payoff_row, equi_min) = fn_benchmark(
-                lambda: self._mixed_min_play(max_touched, fla_max_fre),
+                lambda: self._mixed_min_play(fla_max_fre),
                 label="Minimizer play",
                 display=DISPLAY_BENCHMARK,
             )
 
-            min_touched = self._push(min_touched, v2, memory)
+            self.min_touched = self._push(self.min_touched, v2, memory)
             min_touched_all.append(v2)
             min_touched_last_100.append(v2)
 
@@ -660,6 +722,7 @@ class Game:
                     f"Not Reached Nash Equilibrium at Equi_Min = {equi_min} and Equi_Max = {equi_max}")
 
         # Game has finished
+        print('-' * 20)
         print('MAX_last_100,  all')
         max_l100_fre = max_history_last_100/100
         max_fre = max_history / (game_rounds + 1)
@@ -695,8 +758,8 @@ class Game:
             game_rounds=game_rounds,
             first_max=first_max,
             first_min=first_min,
-            min_touched=min_touched,
-            max_touched=max_touched,
+            min_touched=self.min_touched,
+            max_touched=self.max_touched,
             payoff_matrix=payoff_matrix,
             min_touched_last_100=min_touched_last_100,
             min_touched_all=min_touched_all,
@@ -812,13 +875,13 @@ def max_k_opinion_generator(k, calculate_size=True):
     return product(max_option, repeat=k), size
 
 
-def change_k_innate_opinion(op, k_node: list | tuple, k_opinion: list | tuple | np.ndarray):
+def change_k_innate_opinion(op, nodes: list | tuple, opinions: list | tuple):
     '''
-    Return a new copy of op that has the opinions of k_nodes changed to k_opinion
+    Return a new copy of op that has its opinions at [nodes] changed to [opinions]
     '''
     new_op = np.copy(op)
-    for (index, node) in enumerate(k_node):
-        new_op[node] = k_opinion[index]
+    for (index, node) in enumerate(nodes):
+        new_op[node] = opinions[index]
     return new_op
 
 
