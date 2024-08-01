@@ -5,9 +5,10 @@ from game import Game
 from utils import *
 
 
-def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count=1):
+def generateScriptContent(network, k, experiment, game_rounds, memory, zero_sum, cpu_count=1):
     job_name = f"{network[:2]}k{k}e{experiment}"
     result_name = f"{network}-k-{k}-e-{experiment}-m-{memory}"
+    zero_sum_argument = "--zero-sum" if zero_sum else ""
     script = f"""#!/bin/bash
 #SBATCH --job-name={job_name}
 #SBATCH --output=results/{result_name}-output.txt
@@ -16,7 +17,7 @@ def generateScriptContent(network, k, experiment, game_rounds, memory, cpu_count
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task={cpu_count}
 
-python run.py {network} {k} {experiment} -r {game_rounds} -m {memory}
+python run.py {network} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}
 """
     return script
 
@@ -47,7 +48,12 @@ def main():
                         default=1)
     parser.add_argument("--no-slurm",
                         help="Don't use SLURM to run the experiments. Use this argument to run the script on a local machine.",
-                        action="store_true")
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-z", "--zero-sum",
+                        help="Whether the game is zero-sum",
+                        action="store_true",
+                        default=False)
     args = parser.parse_args()
 
     # Configure the game
@@ -67,18 +73,21 @@ def main():
     # Run the games
     for k in range(1, maxK + 1):
         game_rounds = k * 200 if args.rounds is None else args.rounds
+        zero_sum_argument = "--zero-sum" if args.zero_sum else ""
 
         for experiment in range(1, args.experiments + 1):
             print('-' * 20, flush=True)
             print(f'Experiment {experiment} k={k}', flush=True)
 
             if args.no_slurm:
-                os.system(
-                    f"python run.py {args.network} {k} {experiment} -r {game_rounds} -m {memory}")
+                python_script = f"python run.py {args.network} {k} {experiment} -r {game_rounds} -m {memory} {zero_sum_argument}"
+                os.system(python_script)
             else:
                 f = open(temp_script, "w")
                 f.write(generateScriptContent(args.network,
-                        k, experiment, game_rounds, memory, cpu_count=args.cpus_per_task))
+                        k, experiment, game_rounds, memory,
+                        zero_sum=args.zero_sum,
+                        cpu_count=args.cpus_per_task))
                 f.close()
                 os.system(f"sbatch {temp_script}")
     try:

@@ -3,12 +3,14 @@ import os
 import scipy
 from os import cpu_count
 from game import Game, exportGameResult
+# from game_zero_sum import Game, exportGameResult
 from utils import *
 
 
 def run(network: str, k: int, experiment: int, memory: int,
         game_rounds: int | None = None,
-        disk_dumped: bool = False):
+        disk_dumped: bool = False,
+        zero_sum: bool = False):
     # Prepare network
     if not disk_dumped:
         network_module = import_network(network)
@@ -31,6 +33,7 @@ def run(network: str, k: int, experiment: int, memory: int,
     # Run the game
     game = Game(k, s, A,
                 disk_dumped=disk_dumped,
+                zero_sum=zero_sum,
                 temp_path=os.path.join(
                     os.path.dirname(__file__),
                     "memmaps",
@@ -52,6 +55,10 @@ def main():
     parser.add_argument("experiment",
                         help="The experiment number to run",
                         type=int)
+    parser.add_argument("-z", "--zero-sum",
+                        help="Whether the game is zero-sum",
+                        type=bool,
+                        default=False)
     parser.add_argument("-r", "--rounds",
                         help="The number of rounds to run the game for. Default is k * 200",
                         type=int)
@@ -65,7 +72,13 @@ def main():
     args = parser.parse_args()
 
     fn_benchmark(lambda: run(
-        args.network, args.k, args.experiment, args.memory, args.rounds, args.disk_dumped))
+        args.network,
+        args.k,
+        args.experiment,
+        args.memory,
+        game_rounds=args.rounds,
+        disk_dumped=args.disk_dumped,
+        zero_sum=args.zero_sum))
 
 
 if __name__ == "__main__":
