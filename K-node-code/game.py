@@ -182,11 +182,9 @@ class Game:
         payoffs = np.full(self.h, 10_000.0)
         column = 0
 
-        # print(f'_make_k_payoff_row: iterate through {comb(self.n, self.k) * 2**self.k} columns') # TODO remove
         # iterate through all possible k nodes combinations excluding v2 nodes
         for k_node in combinations([x for x in range(self.n) if x not in v2], self.k):
             k_opinions, k_opinions_size = max_k_opinion_generator(self.k)
-            # s = time.time() # TODO remove
             for k_opinion_index, k_opinion in enumerate(k_opinions):
                 column = find_index(self.n, k_node) * \
                     k_opinions_size + k_opinion_index
@@ -200,9 +198,6 @@ class Game:
                 #     label=f"_make_k_payoff_row: Calculate polarization for column {column}/{self.h}",
                 # )
                 payoffs[column] = payoff_polarization
-            # e = time.time() # TODO remove
-            # et = e - s
-            # print(f'TEST benchmark {et:.5f} seconds') # TODO remove
 
         return payoffs
 
@@ -353,8 +348,8 @@ class Game:
         k_node_count = comb(self.n - len(min_touched), self.k)
         option_count = k_node_count * max_k_opinion_size
 
-        print(f'Maximizer: iterating through {option_count} options ({
-              k_node_count} * {max_k_opinion_size})')  # TODO remove
+        print(f'Maximizer: iterating through {option_count} options +\
+            ({k_node_count} * {max_k_opinion_size})')
 
         cpus = os.cpu_count()
 
@@ -455,7 +450,6 @@ class Game:
             #     label=f"_min_k_mixed_opinion: Minimizer find best action for {v2}",
             #     display=DISPLAY_BENCHMARK,
             # )
-            # print(f'v2: {v2} por {por}') # TODO remove
 
             # if the recent polarization is smaller than the minimum polarization in the history
             if por < min_por:
@@ -493,7 +487,6 @@ class Game:
         """
         weight_M = 0
 
-        # print(f'loop through {self.h} max actions') # TODO remove
         # for column in range(self.h):
         for column, frequency in enumerate(fla_max_fre):
             # TODO ask Xilin why is this condition necessary
@@ -502,35 +495,16 @@ class Game:
 
                 # change innate opinion by max action
                 op_max = change_k_innate_opinion(self.s, v1, v1_opinion)
-                # op_max = fn_benchmark( # TODO remove benchmark
-                #     lambda: self._change_k_innate_opinion(self.s, v1, max_opinion),
-                #     label=f"Change innate opinion for {v1} to {max_opinion}",
-                #     display=DISPLAY_BENCHMARK,
-                # )
 
                 # Derivate optimal Min's opinion for nodeset v2
                 # {sum}{j}(s_j(h_j -c))  - rest of terms
                 M_rest = self._sum_rest(op_max, v2)
-                # M_rest = fn_benchmark( # TODO remove benchmark
-                #     lambda: self._sum_rest(op_max, v2),
-                #     label=f"_sum_rest: Sum rest of terms for {v2}",
-                #     display=DISPLAY_BENCHMARK,
-                # )
                 weight_M += frequency * M_rest  # {sum}{v} p_v * M
 
         # Got optimal Min's opinion for v2
         # give a set of k weighted opinions
         derivative_k_opinion = self._k_derivate_s(v2, weight_M)
-        # k_opinion = fn_benchmark(
-        #     lambda: self._k_derivate_s(v2, weight_M),
-        #     label=f"_k_derivate_s: Derivate optimal Min's opinion for {v2}",
-        #     display=DISPLAY_BENCHMARK,
-        # )
-
-        derivative_k_opinion = [0 if x < 0
-                                else 1 if x > 1
-                                else x
-                                for x in derivative_k_opinion]
+        derivative_k_opinion = np.clip(derivative_k_opinion, 0, 1)
 
         (mixed_por, payoff_row) = self._mixed_k_min_polarization(
             v2, derivative_k_opinion, fla_max_fre)
@@ -838,7 +812,7 @@ def max_k_opinion_generator(k, calculate_size=True):
     return product(max_option, repeat=k), size
 
 
-def change_k_innate_opinion(op, k_node: list | tuple, k_opinion: list | tuple):
+def change_k_innate_opinion(op, k_node: list | tuple, k_opinion: list | tuple | np.ndarray):
     '''
     Return a new copy of op that has the opinions of k_nodes changed to k_opinion
     '''
