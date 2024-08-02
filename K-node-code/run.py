@@ -3,7 +3,6 @@ import os
 import scipy
 from os import cpu_count
 from game import Game, exportGameResult
-# from game_zero_sum import Game, exportGameResult
 from utils import *
 
 

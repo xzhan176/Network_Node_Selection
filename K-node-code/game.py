@@ -472,7 +472,7 @@ class Game:
                              dtype=champion_dtype,
                              mode='w+',
                              shape=(1, ))
-        champion[0]['min_pol'] = 1000
+        champion[0]['min_pol'] = np.inf
 
         cpus = os.cpu_count()
 
@@ -541,8 +541,7 @@ class Game:
             fla_max_fre)
 
         # if minimizer cannot find a action to minimize polarization after maximizer's action
-        # if v2 == None:
-        if min_pol == 1000:
+        if min_pol == np.inf:
             print('Minimizer fail')
         else:
             print(f"Minimizer found its target agents: {v2} {min_opinion}")
@@ -595,6 +594,11 @@ class Game:
         return (k_node, k_opinion)
 
     def run(self, game_rounds: int, memory: int):
+        """
+        If it's a zero-sum game, memory is alway 0.
+        """
+        if self.zero_sum:
+            memory = 0
         payoff_matrix = np.empty((0, self.h), float)
         min_touched_all = []
         min_touched_last_100 = []
