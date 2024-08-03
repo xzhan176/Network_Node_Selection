@@ -186,9 +186,12 @@ class Game:
         payoffs = np.full(self.h, 10_000.0)
         column = 0
 
-        # iterate through all possible k nodes combinations excluding v2 nodes
-        # for k_node in combinations([x for x in range(self.n) if x not in v2], self.k):
-        for k_node in combinations((x for x in range(self.n)), self.k):
+        if self.zero_sum:
+            nodes = (x for x in range(self.n))
+        else:
+            nodes = (x for x in range(self.n) if x not in v2)
+
+        for k_node in combinations(nodes, self.k):
             k_opinions, k_opinions_size = max_k_opinion_generator(self.k)
             unique_nodes = tuple(set(k_node) - set(v2))
             unique_nodes_indices = [k_node.index(x) for x in unique_nodes]
@@ -476,13 +479,13 @@ class Game:
 
         cpus = os.cpu_count()
 
-        def find_champion(champion, v2, fla_max_fre):
+        def check_champion(champion, v2, fla_max_fre):
             candidate = self._min_k_mixed_opinion(v2, fla_max_fre)
             if candidate[3] < champion[0]['min_pol']:
                 champion[0] = candidate
 
         Parallel(n_jobs=cpus)(
-            delayed(find_champion)(champion, v2, fla_max_fre)
+            delayed(check_champion)(champion, v2, fla_max_fre)
             for v2 in k_nodes)
 
         # champion: (v2, opinion, payoff_row, min_pol)
@@ -498,11 +501,9 @@ class Game:
         '''
         Go through each opinion option of each agent to find the best minimizer's action
         '''
-        # set a standard to compare with pol after min's action
-        # initial reference value of 1000
-        min_por = 1000
-        # best action
-        champion = (None, None, 0, None)
+        min_por = np.inf
+        # best action (nodes, opinion, payoff_row, polarization)
+        champion = (None, None, 0, min_por)
 
         if self.zero_sum:
             nodes = (x for x in range(self.n))
@@ -556,11 +557,17 @@ class Game:
 
         for column, frequency in enumerate(fla_max_fre):
             if frequency != 0:
-                v1, v1_opinion = self.map_action(column)
+                k_node, k_node_opinion = self.map_action(column)
 
-                # change innate opinion by max action
-                # TODO ask Xilin whether to use only non-overlapping nodes?
-                op_max = change_k_innate_opinion(self.s, v1, v1_opinion)
+                if self.zero_sum:
+                    # only retain the non-overlapping
+                    unique_node = tuple(set(k_node) - set(v2))
+                    unique_node_indices = [k_node.index(x) for x in unique_node]
+                    unique_node_opinion = [k_node_opinion[i] for i in unique_node_indices]
+                    op_max = change_k_innate_opinion(self.s, unique_node, unique_node_opinion)
+                else:
+                    # change innate opinion by max action
+                    op_max = change_k_innate_opinion(self.s, k_node, k_node_opinion)
 
                 # Derivate optimal Min's opinion for v2 nodes
                 # {sum}{j}(s_j(h_j -c))  - rest of terms
