@@ -39,3 +39,7 @@ You can customize the `run_batch.py` script parameters to run the simulation wit
 ```bash
 python run_batch.py --help
 ```
+
+## Results
+
+The results of the simulation are stored in the `results` directory.
