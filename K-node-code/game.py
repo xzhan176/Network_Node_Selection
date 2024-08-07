@@ -513,7 +513,7 @@ class Game:
             nodes_count = self.n - len(self.max_touched)
 
         print(
-            f'Iterating through {comb(nodes_count, self.k)} k nodes')
+            f'Minimizer Iterating through {comb(nodes_count, self.k)} k nodes')
 
         # TODO optimize min_por
         for v2 in combinations(nodes, self.k):
