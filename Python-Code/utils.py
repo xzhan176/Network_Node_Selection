@@ -159,8 +159,8 @@ def network_anl(s, n, G, agent):
 
     gaps = get_gap(s, n)
     if gaps[agent] < 0:
-        my_gap = {index: value for index,
-                  value in enumerate(gaps) if value < 0}
+        my_gap = {index: value for (index, value)
+                  in enumerate(gaps) if value < 0}
         sorting_gap = sorted(my_gap.items(), key=lambda x: x[1])
         sorted_gap = dict(sorting_gap)
         res4 = rank(sorted_gap, agent)

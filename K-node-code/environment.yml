@@ -1,0 +1,11 @@
+name: opinion_polarization
+channels:
+  - defaults
+dependencies:
+  - scipy=1.11.4
+  - numpy=1.26.4
+  - networkx=3.1
+  - pandas=2.1.4
+  - ipykernel=6.28.0
+  - matplotlib=3.8.0
+  - joblib=1.4.0
