@@ -720,8 +720,8 @@ class Game:
             fla_min_fre = np.array(list(min_history_counter.values()))/(i+1)
             # print(f'fla_min_fre {fla_min_fre.shape}: {fla_min_fre}')
 
-            equi_max = round(equi_max, PRECISION)
-            equi_min = round(equi_min, PRECISION)
+            equi_max = round(float(equi_max), PRECISION)
+            equi_min = round(float(equi_min), PRECISION)
             if equi_max == equi_min:
                 print(
                     f"Reached Nash Equilibrium at round {i} and Equi_Por = {equi_min:.{PRECISION}f}")
